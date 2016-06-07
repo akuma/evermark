@@ -1,0 +1,12 @@
+{
+  "env": {
+    "node": true,
+    "es6": true
+  },
+  "parser": "babel-eslint",
+  "extends": "airbnb-base",
+  "rules": {
+    "semi": [2, "never"],
+    "no-use-before-define": [2, "nofunc"]
+  }
+}

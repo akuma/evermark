@@ -1,0 +1,58 @@
+{
+  "name": "evermark",
+  "version": "0.1.0",
+  "description": "A command line tool for syncing markdown files to Evernote.",
+  "keywords": [
+    "command",
+    "evernote",
+    "markdown"
+  ],
+  "author": "Weijia Huang <ihuangwj@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/akuma/evermark"
+  },
+  "bin": {
+    "evermark": "./bin/evermark"
+  },
+  "main": "./lib/index.js",
+  "scripts": {
+    "lint": "eslint ./src/*.js ./src/**/*.js --quiet --fix",
+    "validate": "npm run lint; npm outdated --depth 0"
+  },
+  "dependencies": {
+    "babel-polyfill": "^6.9.1",
+    "babel-register": "^6.9.0",
+    "commander": "^2.9.0"
+  },
+  "devDependencies": {
+    "babel-eslint": "^6.0.4",
+    "babel-preset-es2015": "^6.9.0",
+    "babel-preset-stage-0": "^6.5.0",
+    "cz-conventional-changelog": "^1.1.6",
+    "eslint": "^2.11.1",
+    "eslint-config-airbnb-base": "^3.0.1",
+    "eslint-plugin-import": "^1.8.1",
+    "ghooks": "^1.2.1",
+    "validate-commit-message": "^3.0.1"
+  },
+  "files": [
+    "bin",
+    "lib",
+    "LICENSE",
+    "README.md"
+  ],
+  "config": {
+    "commitizen": {
+      "path": "cz-conventional-changelog"
+    },
+    "ghooks": {
+      "pre-commit": "eslint ./src/*.js ./src/**/*.js --quiet",
+      "commit-msg": "validate-commit-msg"
+    }
+  },
+  "engines": {
+    "node": ">=0.10"
+  }
+}
