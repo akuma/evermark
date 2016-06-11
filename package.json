@@ -30,6 +30,7 @@
     "commander": "^2.9.0",
     "evernote": "^1.25.82",
     "fs-extra": "^0.30.0",
+    "highlight.js": "^9.4.0",
     "inline-css": "^2.2.2",
     "marked": "^0.3.5"
   },
