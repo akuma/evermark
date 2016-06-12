@@ -11,6 +11,7 @@
   font-size: 16px;
   line-height: 1.6;
   word-wrap: break-word;
+  margin-bottom: 50px;
 }
 
 .markdown-body a {
@@ -477,6 +478,12 @@
   border-radius: 3px;
 }
 
+.markdown-body code.inline {
+  color: #c7254e;
+  background-color: #f9f2f4;
+    padding: 2px 4px;
+}
+
 .markdown-body code:before,
 .markdown-body code:after {
   letter-spacing: -0.2em;
@@ -493,23 +500,13 @@
   border: 0;
 }
 
-.markdown-body .highlight {
-  margin-bottom: 16px;
-}
-
-.markdown-body .highlight pre,
 .markdown-body pre {
   padding: 16px;
   overflow: auto;
   font-size: 85%;
   line-height: 1.45;
-  background-color: #f7f7f7;
+  /*background-color: #f7f7f7;*/
   border-radius: 3px;
-}
-
-.markdown-body .highlight pre {
-  margin-bottom: 0;
-  word-break: normal;
 }
 
 .markdown-body pre {
