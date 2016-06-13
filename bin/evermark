@@ -1,0 +1,134 @@
+#!/usr/bin/env node
+/* eslint no-console: 0 */
+/* eslint import/no-unresolved: 0 */
+
+// require('babel-register')
+// require('babel-polyfill')
+const co = require('co')
+const chalk = require('chalk')
+const program = require('commander')
+const pkg = require('../package.json')
+const evermark = require('../lib/evermark')
+const config = require('../lib/config')
+const logger = require('../lib/logger')
+
+program
+  .version(pkg.version)
+  .usage('[command]')
+  .on('*', () => {
+    program.help()
+  })
+
+const commands = {
+  init: {
+    cmd: 'init [destination]',
+    desc: 'Create a new Evermark folder at the specified path or the current directory.',
+    action: init,
+    args: {
+      '[destination]': 'Folder path. Initialize in current folder if not specified',
+    },
+  },
+  config: {
+    cmd: 'config [name] [value]',
+    desc: 'Get or set configurations.',
+    action: getOrSetConfig,
+    args: {
+      '[name]': 'Setting name. Leave it blank if you want to show all configurations.',
+      '[value]': 'New value of a setting. ' +
+        'Leave it blank if you want to show a single configuration.',
+    },
+  },
+  new: {
+    cmd: 'new <title>',
+    desc: 'Create a new note.',
+    action: newNote,
+    args: {
+      '<title>': 'Note title. Wrap it with quotations to escape.',
+    },
+  },
+  publish: {
+    cmd: 'publish <file>',
+    desc: 'Publish a locale note to Evernote.',
+    action: publishNote,
+    args: {
+      '<file>': 'Note file path.',
+    },
+  },
+  help: {
+    cmd: 'help [command]',
+    desc: 'Get help on a command.',
+    action: commandHelp,
+  },
+}
+
+Object.keys(commands).forEach(cmd => {
+  const command = commands[cmd]
+  const prog = program
+    .command(command.cmd)
+    .description(command.desc)
+
+  if (command.action) {
+    prog.action(command.action)
+  }
+})
+
+program.parse(process.argv)
+
+if (process.argv.length === 2) {
+  program.help()
+}
+
+function bold(command) {
+  return chalk.bold(command)
+}
+
+function commandHelp(cmd) {
+  const command = commands[cmd]
+  if (command) {
+    printCommandHelp(cmd, command.desc, command.args)
+  } else {
+    program.help()
+  }
+}
+
+function printCommandHelp(command, desc, args = {}) {
+  console.log()
+  console.log(`  Usage: evermark ${command} ${Object.keys(args).map(k => k).join(' ')}`)
+  console.log()
+  console.log('  Description:')
+  console.log(`  ${desc}`)
+
+  const argDesces = Object.keys(args)
+    .map(k => `    ${bold(k.substring(1, k.length - 1))}\t${args[k]}`)
+  if (argDesces.length) {
+    console.log()
+    console.log('  Arguments:')
+    argDesces.map(s => console.log(s))
+  }
+
+  console.log()
+}
+
+function init(destination) {
+  co(function* fn() {
+    yield config.initConfig(destination)
+  }).catch(e => logger.error(e))
+}
+
+function getOrSetConfig(name, value) {
+  co(function* fn() {
+    yield config.getOrSetConfig(name, value)
+  }).catch(e => logger.error(e))
+}
+
+function newNote(title) {
+  co(function* fn() {
+    yield evermark.createLocalNote(title)
+  }).catch(e => logger.error(e))
+}
+
+function publishNote(file) {
+  co(function* fn() {
+    yield evermark.publishNote(file)
+  }).catch(e => logger.error(e))
+}
