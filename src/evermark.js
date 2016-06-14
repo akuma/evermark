@@ -23,6 +23,11 @@ export function* createLocalNote(title) {
 
   const noteDir = path.dirname(configPath)
   const notePath = `${noteDir}/notes/${title}.md`
+  const isExists = yield fileUtils.exists(notePath)
+  if (isExists) {
+    throw new Error(`Note with title ${title} is exists.`)
+  }
+
   yield fileUtils.ensureFile(notePath)
   yield fileUtils.writeFile(notePath, `# ${title}\n`)
   info(`Successfully created local note: ${magenta(notePath)}`)
