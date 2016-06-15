@@ -2,8 +2,6 @@
 /* eslint no-console: 0 */
 /* eslint import/no-unresolved: 0 */
 
-// require('babel-register')
-// require('babel-polyfill')
 const co = require('co')
 const chalk = require('chalk')
 const program = require('commander')

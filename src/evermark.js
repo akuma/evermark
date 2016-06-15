@@ -1,7 +1,7 @@
 import 'babel-polyfill'
 import path from 'path'
 import chalk from 'chalk'
-import marked from 'marked'
+import Remarkable from 'remarkable'
 import hljs from 'highlight.js'
 import inlineCss from 'inline-css'
 import { Evernote } from 'evernote'
@@ -14,6 +14,45 @@ import { getConfigPath, readConfig } from './config'
 let evernoteClient = null
 const magenta = chalk.magenta
 const debug = require('debug')('evermark')
+
+const remarkable = new Remarkable({
+  html: false,    // Enable HTML tags in source
+  xhtmlOut: true, // Use '/' to close single tags (<br />)
+
+  // Highlighter function. Should return escaped HTML,
+  // or '' if the source string is not changed
+  highlight: (code, lang) => {
+    if (lang && hljs.getLanguage(lang)) {
+      try {
+        return hljs.highlight(lang, code).value
+      } catch (e) {
+        // Ignore
+      }
+    }
+
+    try {
+      return hljs.highlightAuto(code).value
+    } catch (e) {
+      // Ignore
+    }
+
+    return ''
+  },
+})
+
+// Add inline code class
+const codeRule = remarkable.renderer.rules.code
+remarkable.renderer.rules.code = (...args) => {
+  const result = codeRule.call(remarkable, ...args)
+  return result.replace('<code>', '<code class="inline">')
+}
+
+// Add block code class
+const fenceRule = remarkable.renderer.rules.fence
+remarkable.renderer.rules.fence = (...args) => {
+  const result = fenceRule.call(remarkable, ...args)
+  return result.replace('<pre>', '<pre class="hljs">')
+}
 
 export function* createLocalNote(title) {
   const configPath = yield getConfigPath()
@@ -52,7 +91,8 @@ function* createNotebookIfPossible(name) {
 function* saveNote(content, notePath) {
   const note = new Evernote.Note()
 
-  const noteInfo = parseNoteInfo(content)
+  const tokens = remarkable.parse(content, {})
+  const noteInfo = parseNoteInfo(tokens)
   note.title = noteInfo.noteTitle
 
   if (noteInfo.notebookName) {
@@ -67,7 +107,7 @@ function* saveNote(content, notePath) {
   // The content of an Evernote note is represented using Evernote Markup Language
   // (ENML). The full ENML specification can be found in the Evernote API Overview
   // at http://dev.evernote.com/documentation/cloud/chapters/ENML.php
-  const htmlContent = yield generateHtml(content)
+  const htmlContent = yield generateHtml(tokens)
   note.content = '<?xml version="1.0" encoding="UTF-8"?>' +
     '<!DOCTYPE en-note SYSTEM "http://xml.evernote.com/pub/enml2.dtd">' +
     `<en-note>${htmlContent}</en-note>`
@@ -113,17 +153,17 @@ function getNoteModel() {
   })
 }
 
-function parseNoteInfo(content) {
-  const tokens = marked.lexer(content)
-  const titleToken = tokens.find(token => token.type === 'heading')
-  const noteTitle = titleToken ? titleToken.text : 'untitled'
+function parseNoteInfo(tokens = []) {
+  const preTitleIndex = tokens.findIndex(token => token.type === 'heading_open')
+  const titleToken = preTitleIndex >= 0 ? tokens[preTitleIndex + 1] : null
+  const noteTitle = titleToken ? titleToken.content : 'untitled'
 
   let notebookName = null
   let tagNames = null
-  const notebookToken = tokens.find(token => /^ *@\(.+\)(\[.+\])?$/.test(token.text))
+  const notebookToken = tokens.find(token => /^ *@\(.+\)(\[.+\])?$/.test(token.content))
   debug('notebookToken: %o', notebookToken)
   if (notebookToken) {
-    const matched = notebookToken.text.trim().match(/^ *@\((.+)\)(\[(.+)\])?$/)
+    const matched = notebookToken.content.trim().match(/^ *@\((.+)\)(\[(.+)\])?$/)
     notebookName = matched[1]
     debug('notebookName: %s', notebookName)
 
@@ -140,46 +180,24 @@ function parseNoteInfo(content) {
   return { noteTitle, notebookName, tagNames }
 }
 
-function* generateHtml(markdown) {
-  const renderer = new marked.Renderer()
-  renderer.code = (code, language) => {
-    let hljsCode = code
-    try {
-      hljsCode = hljs.highlight(language, code).value
-    } catch (e) {
-      // Ignore
-    }
-    return `<pre class="hljs"><code class="${language}">${hljsCode}</code></pre>`
-  }
-  renderer.codespan = code => `<code class="inline">${code}</code>`
+function* generateHtml(tokens = []) {
+  const markedHtml = remarkable.renderer.render(tokens, remarkable.options)
+  debug('markedHtml: %s', markedHtml)
 
+  // Html with styles
   const htmlStyles = yield [
     fileUtils.readFile(`${__dirname}/../themes/markdown/github.css`),
     fileUtils.readFile(`${__dirname}/../themes/highlight/gruvbox-dark.css`),
   ]
-
-  // Markdown to html
-  const markedHtml = yield new Promise((resolve, reject) => (
-    marked(markdown, {
-      renderer,
-      xhtml: true,
-      breaks: true,
-      sanitize: true,
-    }, (err, result) => {
-      if (err) return reject(err)
-      return resolve(result)
-    })
-  ))
-
-  // Html with styles
-  const styledHtml = `<style>${htmlStyles[0]}${htmlStyles[1]}</style>` +
+  const styleHtml = `<style>${htmlStyles[0]}${htmlStyles[1]}</style>` +
     `<div class="markdown-body">${markedHtml}</div>`
 
   // Make html classes to inline styles
-  return inlineCss(styledHtml, {
+  const inlineStyleHtml = yield inlineCss(styleHtml, {
     url: '/',
     xmlMode: true,
     removeStyleTags: true,
     removeHtmlSelectors: true,
   })
+  return inlineStyleHtml
 }
