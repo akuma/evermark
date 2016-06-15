@@ -120,10 +120,10 @@ function parseNoteInfo(content) {
 
   let notebookName = null
   let tagNames = null
-  const notebookToken = tokens.find(token => /@\(.+\)(\[.+\])?/.test(token.text))
+  const notebookToken = tokens.find(token => /^ *@\(.+\)(\[.+\])?$/.test(token.text))
   debug('notebookToken: %o', notebookToken)
   if (notebookToken) {
-    const matched = notebookToken.text.trim().match(/@\((.+)\)(\[(.+)\])?/)
+    const matched = notebookToken.text.trim().match(/^ *@\((.+)\)(\[(.+)\])?$/)
     notebookName = matched[1]
     debug('notebookName: %s', notebookName)
 
