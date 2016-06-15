@@ -2,26 +2,50 @@
 
 > A command line tool for syncing markdown files to Evernote.
 
-**Evermark** 是一款基于印象笔记（Evernote）的 Markdown 笔记命令行工具，简单实用。
+**Evermark** 是一款基于 Evernote 的 Markdown 笔记命令行工具，简单实用。
 
-- 支持基于命令行添加、发布笔记，同时会自动添加在笔记内容中指定的笔记本和标签；
-- 支持转换 Markdown 格式的笔记，支持高亮代码块、引用网络图片（本地图片暂不支持）；
+- 支持基于命令行添加、发布笔记，同时会自动添加在笔记内容中指定的笔记本和标签。
+- 支持转换 Markdown 格式的笔记，支持高亮代码块、引用网络图片（本地图片暂不支持）。
 
 -------------------
 
 ## 安装方法
 
-``` sh
+```bash
 npm install -g evermark
 ```
 
 ## 命令说明
 
-初始化         `evermark init <destination>`
-查看或修改配置   `evermark config [name] [value]`
-添加笔记        `evermark new <title>`
-发布笔记        `evermark publish <file>`
-查看帮助        `evermark help [command]`
+初始化笔记目录
+
+```bash
+evermark init <destination>
+```
+
+查看或修改配置
+
+```bash
+evermark config [name] [value]
+```
+
+添加笔记文件（创建一个本地的 markdown 文件）
+
+```bash
+evermark new <title>
+```
+
+发布笔记（将 markdown 文件发布到 Evernote，对于已发布过的文件会采取更新操作）
+
+```bash
+evermark publish <file>
+```
+
+查看帮助
+
+```bash
+evermark help [command]
+```
 
 ## Markdown 简介
 
@@ -31,28 +55,35 @@ npm install -g evermark
 
 ### 代码块
 
-``` python
-@requires_authorization
-def somefunc(param1='', param2=0):
-    '''A docstring'''
-    if param1 > param2: # interesting
-        print 'Greater'
-    return (param2 - param1 + 1) or None
-class SomeClass:
-    pass
->>> message = '''interpreter
-... prompt'''
+```javascript
+var s = "JavaScript syntax highlighting";
+alert(s);
+```
+
+```python
+s = "Python syntax highlighting"
+print s
+```
+
+```
+No language indicated, so no syntax highlighting.
+But let's throw in a <b>tag</b>.
 ```
 
 ### 表格
 
-| Item      |    Value | Qty  |
-| :-------- | --------:| :--: |
-| Computer  | 1600 USD |  5   |
-| Phone     |   12 USD |  12  |
-| Pipe      |    1 USD | 234  |
+| Tables        | Are           | Cool  |
+| ------------- |:-------------:| -----:|
+| col 3 is      | right-aligned | $1600 |
+| col 2 is      | centered      |   $12 |
+| zebra stripes | are neat      |    $1 |
 
-## 印象笔记相关
+Markdown | Less | Pretty
+--- | --- | ---
+*Still* | `renders` | **nicely**
+1 | 2 | 3
+
+## Evernote 相关
 
 - **Evermark** 支持 `@(笔记本)[标签 A|标签 B]` 语法, 以选择笔记本和添加标签。
 - **Evermark** 自动使用文档内出现的第一个标题作为笔记标题。例如本文，就是第一行的 `Evermark`。
