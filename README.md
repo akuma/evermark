@@ -1,5 +1,8 @@
 # Evermark
 
+[![NPM version][npm-image]][npm-url]
+[![Dependency Status][david-image]][david-url]
+
 > A command line tool for syncing markdown files to Evernote.
 
 **Evermark** 是一款基于 Evernote 的 Markdown 笔记命令行工具，简单实用。
