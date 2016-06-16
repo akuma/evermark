@@ -1,4 +1,3 @@
-import 'babel-polyfill'
 import path from 'path'
 import chalk from 'chalk'
 import Remarkable from 'remarkable'

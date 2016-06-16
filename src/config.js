@@ -1,5 +1,4 @@
 import fileUtils from './fileUtils'
-import logger from './logger'
 
 const debug = require('debug')('config')
 
@@ -7,8 +6,8 @@ export const APP_NAME = 'Evermark'
 export const APP_DB_NAME = 'evermark.db'
 export const APP_CONFIG_NAME = 'evermark.json'
 
-export function* getConfigPath() {
-  const configPath = yield fileUtils.searchFile(APP_CONFIG_NAME)
+export function* getConfigPath(dir) {
+  const configPath = yield fileUtils.searchFile(APP_CONFIG_NAME, dir)
   debug('configPath: %s', configPath)
   if (!configPath) {
     throw new Error('Please run `evermark init [destination]` to init a new Evermark folder')
@@ -16,8 +15,8 @@ export function* getConfigPath() {
   return configPath
 }
 
-export function* readConfig() {
-  const configPath = yield getConfigPath()
+export function* readConfig(dir) {
+  const configPath = yield getConfigPath(dir)
 
   let config = null
   try {
@@ -38,35 +37,30 @@ export function* readConfig() {
   return config
 }
 
-export function* getOrSetConfig(name, value) {
-  const config = yield readConfig()
+export function* getConfig(name, dir) {
+  const config = yield readConfig(dir)
+  return config[name]
+}
 
-  if (!name) {
-    logger.info(config)
-    return
+export function* setConfig(name, value, dir) {
+  const config = yield readConfig(dir)
+
+  if (value === 'true') {
+    config[name] = true
+  } else if (value === 'false') {
+    config[name] = false
+  } else {
+    config[name] = value
   }
 
-  if (!value) {
-    logger.info(`${name}: ${config[name]}`)
-    return
-  }
-
-  const preValue = config[name]
-  if (preValue === value) {
-    logger.info(`The config ${name} is not changed: ${value}`)
-    return
-  }
-
-  config[name] = value
-
-  const configPath = yield getConfigPath()
-  yield saveConfig(configPath, config)
+  const configPath = yield getConfigPath(dir)
+  return yield saveConfig(configPath, config)
 }
 
 export function* initConfig(destination = '.') {
+  const dest = destination.endsWith('/') ? destination : `${destination}/`
   const config = { token: 'Your developer token', china: true }
-  yield saveConfig(`${destination}/${APP_CONFIG_NAME}`, config)
-  logger.info('Evermark folder has been initialized, you can add some notes now.')
+  return yield saveConfig(`${dest}${APP_CONFIG_NAME}`, config)
 }
 
 function* saveConfig(file, config) {
@@ -77,7 +71,7 @@ function* saveConfig(file, config) {
     // Beautify json string and save to config file
     const configStr = JSON.stringify(config, null, 2)
     yield fileUtils.writeFile(file, configStr)
-    logger.info(`Successfully saved config:\n\n${configStr}`)
+    return configStr
   } catch (e) {
     throw new Error(e)
   }
