@@ -56,18 +56,19 @@ export function writeFile(file, data) {
  * 根据文件名递归查找文件，直至到最顶层目录为止。
  */
 export function searchFile(filename, dir = './') {
-  const currentPath = path.resolve(dir, filename)
+  const aDir = dir.endsWith('/') ? dir : `${dir}/`
+  const currentPath = path.resolve(aDir, filename)
   return exists(currentPath).then(isExists => {
     if (isExists) {
       return currentPath
     }
 
-    const nextPath = path.resolve(`${dir}../`, filename)
+    const nextPath = path.resolve(`${aDir}../`, filename)
     if (nextPath === currentPath) {
       return null
     }
 
-    return searchFile(filename, `${dir}../`)
+    return searchFile(filename, `${aDir}../`)
   })
 }
 
