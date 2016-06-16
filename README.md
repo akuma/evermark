@@ -1,10 +1,13 @@
 # Evermark
 
 [![NPM version][npm-image]][npm-url]
+[![Build Status][build-image]][build-url]
 [![Dependency Status][david-image]][david-url]
 [![Dependency Status][david-dev-image]][david-dev-url]
 
 [npm-image]: https://img.shields.io/npm/v/evermark.svg?style=flat-square
+[build-image]: https://travis-ci.org/akuma/evermark.svg?branch=master
+[build-url]: https://travis-ci.org/akuma/evermark
 [npm-url]: https://npmjs.org/package/evermark
 [david-image]: https://david-dm.org/akuma/evermark.svg
 [david-url]: https://david-dm.org/akuma/evermark
