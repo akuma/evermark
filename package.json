@@ -19,7 +19,7 @@
   "main": "./src/evermark.js",
   "scripts": {
     "build": "babel src -d ./lib",
-    "prepublish": "npm run build",
+    "prepublish": "npm test; npm run build",
     "lint": "eslint ./src/*.js ./src/**/*.js --quiet --fix",
     "validate": "npm run lint; npm outdated --depth 0",
     "test": "ava",
