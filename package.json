@@ -21,7 +21,9 @@
     "build": "babel src -d ./lib",
     "prepublish": "npm run build",
     "lint": "eslint ./src/*.js ./src/**/*.js --quiet --fix",
-    "validate": "npm run lint; npm outdated --depth 0"
+    "validate": "npm run lint; npm outdated --depth 0",
+    "test": "ava",
+    "watchtest": "npm test -- --watch"
   },
   "dependencies": {
     "babel-polyfill": "^6.9.1",
@@ -38,6 +40,7 @@
     "warehouse": "^2.2.0"
   },
   "devDependencies": {
+    "ava": "^0.15.2",
     "babel-cli": "^6.10.1",
     "babel-eslint": "^6.0.4",
     "babel-preset-es2015": "^6.9.0",
@@ -53,20 +56,41 @@
     "bin",
     "lib",
     "src",
+    "test",
     "themes",
     "LICENSE",
     "README.md"
   ],
   "config": {
+    "ghooks": {
+      "pre-commit": "npm run lint; npm run test",
+      "commit-msg": "validate-commit-msg"
+    },
     "commitizen": {
       "path": "cz-conventional-changelog"
     },
-    "ghooks": {
-      "pre-commit": "eslint ./src/*.js ./src/**/*.js --quiet",
-      "commit-msg": "validate-commit-msg"
+    "validate-commit-msg": {
+      "helpMessage": "\nPlease fix your commit message (see http://npm.im/commitizen)\n",
+      "types": [
+        "feat",
+        "fix",
+        "docs",
+        "style",
+        "refactor",
+        "perf",
+        "test",
+        "chore",
+        "revert",
+        "custom"
+      ]
     }
   },
   "engines": {
-    "node": ">= 4.0"
+    "node": ">=4.0"
+  },
+  "ava": {
+    "failFast": true,
+    "require": ["babel-register"],
+    "babel": "inherit"
   }
 }
