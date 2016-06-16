@@ -1,8 +1,7 @@
 import test from 'ava'
-import path from 'path'
 import fileUtils from '../src/fileUtils'
 
-const testDir = path.normalize(`${__dirname}/../build/test`)
+const testDir = `${__dirname}/fileutils-test`
 
 test.before(async t => {
   await fileUtils.remove(testDir)

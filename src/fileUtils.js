@@ -73,6 +73,7 @@ export function searchFile(filename, dir = './') {
 }
 
 export default {
+  fs,
   exists,
   remove,
   ensureDir,
