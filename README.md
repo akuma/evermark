@@ -101,3 +101,7 @@ Markdown | Less | Pretty
 
 - **Evermark** 支持 `@(笔记本)[标签 A|标签 B]` 语法, 以选择笔记本和添加标签。
 - **Evermark** 自动使用文档内出现的第一个标题作为笔记标题。例如本文，就是第一行的 `Evermark`。
+
+## License
+
+MIT
