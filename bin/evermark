@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 /* eslint no-console: 0 */
+/* eslint no-param-reassign: 0 */
 /* eslint import/no-unresolved: 0 */
 
 require('babel-polyfill')
@@ -90,7 +91,9 @@ function commandHelp(cmd) {
   }
 }
 
-function printCommandHelp(command, desc, args = {}) {
+function printCommandHelp(command, desc, args) {
+  args = args || {}
+
   console.log()
   console.log(`  Usage: evermark ${command} ${Object.keys(args).map(k => k).join(' ')}`)
   console.log()
