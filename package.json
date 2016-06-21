@@ -22,9 +22,8 @@
     "prepublish": "npm test; npm run build",
     "lint": "eslint ./src/*.js ./src/**/*.js --quiet --fix",
     "validate": "npm run lint; npm outdated --depth 0",
-    "test": "ava",
-    "watchtest": "npm test -- --watch",
-    "report": "nyc --reporter=lcov --reporter=text npm test"
+    "test": "nyc --reporter=lcov --reporter=text ava",
+    "watchtest": "npm test -- --watch"
   },
   "dependencies": {
     "babel-polyfill": "^6.9.1",
