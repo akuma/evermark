@@ -3,16 +3,12 @@ import fileUtils from '../src/fileUtils'
 
 const testDir = `${__dirname}/fileutils-test`
 
-test.before(async t => {
+test.before(async () => {
   await fileUtils.remove(testDir)
-  const exists = await fileUtils.exists(testDir)
-  t.false(exists)
 })
 
-test.after(async t => {
+test.after(async () => {
   await fileUtils.remove(testDir)
-  const exists = await fileUtils.exists(testDir)
-  t.false(exists)
 })
 
 test('should exists', async t => {
@@ -60,8 +56,11 @@ test('should readFile & writeFile', async t => {
   exists = await fileUtils.exists(file)
   t.true(exists)
 
-  const content = await fileUtils.readFile(file)
+  let content = await fileUtils.readFile(file)
   t.is(content, '测试')
+
+  content = await fileUtils.readFile(file, 'base64')
+  t.is(content, '5rWL6K+V')
 })
 
 test('should searchFile', async t => {
@@ -69,15 +68,24 @@ test('should searchFile', async t => {
   const filePath = `${testDir}/${filename}`
   await fileUtils.ensureFile(filePath)
 
-  let exists = await fileUtils.searchFile(filename, `${testDir}`)
-  t.is(exists, filePath)
+  let result = await fileUtils.searchFile(filename, `${testDir}`)
+  t.is(result, filePath)
 
-  exists = await fileUtils.searchFile(filename, `${testDir}/foo`)
-  t.is(exists, filePath)
+  result = await fileUtils.searchFile(filename, `${testDir}/foo`)
+  t.is(result, filePath)
 
-  exists = await fileUtils.searchFile(filename, `${testDir}/foo/`)
-  t.is(exists, filePath)
+  result = await fileUtils.searchFile(filename, `${testDir}/foo/`)
+  t.is(result, filePath)
 
-  exists = await fileUtils.searchFile(filename, `${testDir}/foo//`)
-  t.is(exists, filePath)
+  result = await fileUtils.searchFile(filename, `${testDir}/foo//`)
+  t.is(result, filePath)
+
+  result = await fileUtils.searchFile(filename, `${testDir}/foo/bar`)
+  t.is(result, filePath)
+
+  result = await fileUtils.searchFile(filename, '/test')
+  t.is(result, null)
+
+  result = await fileUtils.searchFile('not-exists-file.txt')
+  t.is(result, null)
 })
