@@ -1,17 +1,14 @@
 import path from 'path'
-import chalk from 'chalk'
 import Remarkable from 'remarkable'
 import hljs from 'highlight.js'
 import inlineCss from 'inline-css'
 import { Evernote } from 'evernote'
 import fileUtils from './fileUtils'
 import EvernoteClient from './evernote'
-import db from './db'
-import { info } from './logger'
-import { getConfigPath, readConfig } from './config'
+import DB from './db'
+import { APP_NAME, getConfigPath, getDbPath, readConfig } from './config'
 
 let evernoteClient = null
-const magenta = chalk.magenta
 const debug = require('debug')('evermark')
 
 const remarkable = new Remarkable({
@@ -53,38 +50,23 @@ remarkable.renderer.rules.fence = (...args) => {
   return result.replace('<pre>', '<pre class="hljs">')
 }
 
-export function* createLocalNote(title) {
-  const configPath = yield getConfigPath()
-  if (!configPath) {
-    return
-  }
-
+export function* createLocalNote(title, dir) {
+  const configPath = yield getConfigPath(dir)
   const noteDir = path.dirname(configPath)
   const notePath = `${noteDir}/notes/${title}.md`
   const isExists = yield fileUtils.exists(notePath)
   if (isExists) {
-    throw new Error(`Note with title ${title} is exists.`)
+    throw new Error(`Note with title ${title} is exists`)
   }
 
   yield fileUtils.ensureFile(notePath)
   yield fileUtils.writeFile(notePath, `# ${title}\n`)
-  info(`Successfully created local note: ${magenta(notePath)}`)
+  return notePath
 }
 
 export function* publishNote(notePath) {
   const content = yield fileUtils.readFile(notePath)
   return yield saveNote(content, notePath)
-}
-
-function* createNotebookIfPossible(name) {
-  const enClient = yield getEvernoteClient()
-  const notebooks = yield enClient.listNotebooks()
-  let notebook = notebooks.find(nb => nb.name === name)
-  if (!notebook) {
-    notebook = yield enClient.createNotebook(name)
-    info(`Successfully created notebook: ${magenta(notebook.name)}`)
-  }
-  return notebook
 }
 
 function* saveNote(content, notePath) {
@@ -116,22 +98,42 @@ function* saveNote(content, notePath) {
 
 function* doSaveNote(note, notePath) {
   const enClient = yield getEvernoteClient()
-  const Note = yield getNoteModel()
+  const db = yield getDB()
+  const Note = yield db.model('notes', {
+    guid: String,
+    path: String,
+    created: { type: Date, default: Date.now },
+  })
 
   const dbNote = Note.findOne({ path: notePath })
   if (dbNote) {
     const aNote = note
     aNote.guid = dbNote.guid
     const updatedNote = yield enClient.updateNote(aNote)
-    info(`Successfully updated note: ${magenta(updatedNote.title)}`)
     return updatedNote
   }
 
-  const createdNote = yield enClient.createNote(note)
-  yield Note.insertOne({ guid: createdNote.guid, path: notePath })
+  const aNote = note
+  const noteAttrs = new Evernote.NoteAttributes()
+  noteAttrs.source = APP_NAME
+  noteAttrs.sourceApplication = APP_NAME
+  noteAttrs.contentClass = APP_NAME // Make the note read-only
+  aNote.attributes = noteAttrs
+
+  const createdNote = yield enClient.createNote(aNote)
+  yield Note.insert({ guid: createdNote.guid, path: notePath })
   yield db.save()
-  info(`Successfully created note: ${magenta(createdNote.title)}`)
   return createdNote
+}
+
+function* createNotebookIfPossible(name) {
+  const enClient = yield getEvernoteClient()
+  const notebooks = yield enClient.listNotebooks()
+  let notebook = notebooks.find(nb => nb.name === name)
+  if (!notebook) {
+    notebook = yield enClient.createNotebook(name)
+  }
+  return notebook
 }
 
 function* getEvernoteClient() {
@@ -144,12 +146,9 @@ function* getEvernoteClient() {
   return evernoteClient
 }
 
-function getNoteModel() {
-  return db.model('notes', {
-    guid: String,
-    path: String,
-    created: { type: Date, default: Date.now },
-  })
+function* getDB() {
+  const dbPath = yield getDbPath()
+  return new DB(dbPath)
 }
 
 function parseNoteInfo(tokens = []) {

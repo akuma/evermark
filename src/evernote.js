@@ -1,6 +1,5 @@
 import Promise from 'bluebird'
 import { Evernote } from 'evernote'
-import { APP_NAME } from './config'
 
 const debug = require('debug')('evernote')
 
@@ -35,13 +34,7 @@ export default class EvernoteClient {
   }
 
   createNote(note) {
-    const aNote = note
-    const noteAttrs = new Evernote.NoteAttributes()
-    noteAttrs.source = APP_NAME
-    noteAttrs.sourceApplication = APP_NAME
-    noteAttrs.contentClass = APP_NAME // Make the note read-only
-    aNote.attributes = noteAttrs
-    return this.noteStore.createNoteAsync(aNote)
+    return this.noteStore.createNoteAsync(note)
   }
 
   updateNote(note) {

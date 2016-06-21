@@ -1,3 +1,4 @@
+import path from 'path'
 import fileUtils from './fileUtils'
 
 const debug = require('debug')('config')
@@ -6,13 +7,19 @@ export const APP_NAME = 'Evermark'
 export const APP_DB_NAME = 'evermark.db'
 export const APP_CONFIG_NAME = 'evermark.json'
 
-export function* getConfigPath(dir) {
+export function* getConfigPath(dir = './') {
   const configPath = yield fileUtils.searchFile(APP_CONFIG_NAME, dir)
   debug('configPath: %s', configPath)
   if (!configPath) {
     throw new Error('Please run `evermark init [destination]` to init a new Evermark folder')
   }
   return configPath
+}
+
+export function* getDbPath(dir) {
+  const configPath = yield getConfigPath(dir)
+  const dbDir = path.dirname(configPath)
+  return `${dbDir}/${APP_DB_NAME}`
 }
 
 export function* readConfig(dir) {

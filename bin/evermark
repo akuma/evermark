@@ -10,6 +10,7 @@ const program = require('commander')
 const pkg = require('../package.json')
 const evermark = require('../lib')
 
+const magenta = chalk.magenta
 const logger = evermark.logger
 
 program
@@ -140,12 +141,14 @@ function getOrSetConfig(name, value) {
 
 function newNote(title) {
   co(function* fn() {
-    yield evermark.createLocalNote(title)
+    const notePath = yield evermark.createLocalNote(title)
+    logger.info(`Successfully created local note: ${magenta(notePath)}`)
   }).catch(e => logger.error(e))
 }
 
 function publishNote(file) {
   co(function* fn() {
-    yield evermark.publishNote(file)
+    const note = yield evermark.publishNote(file)
+    logger.info(`Successfully publish note: ${magenta(note.title)}`)
   }).catch(e => logger.error(e))
 }

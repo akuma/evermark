@@ -1,55 +1,35 @@
-import path from 'path'
 import Promise from 'bluebird'
 import Database from 'warehouse'
-import { searchFile, ensureFile } from './fileUtils'
-import { APP_CONFIG_NAME, APP_DB_NAME } from './config'
+import { ensureFile } from './fileUtils'
 
 const debug = require('debug')('db')
 
-// Database object
-let db = null
-
-// Model objects
-const models = {}
-
-function get() {
-  if (db) {
-    return Promise.resolve(db)
+export default class DB {
+  constructor(dbPath) {
+    debug('dbPath: %s', dbPath)
+    this.dbPath = dbPath
+    this.models = {}
   }
 
-  return searchFile(APP_CONFIG_NAME).then(configPath => {
-    if (!configPath) {
-      return Promise.reject('Please run `evermark init [destination]` first')
+  get() {
+    if (this.db) {
+      return Promise.resolve(this.db)
     }
 
-    const noteDir = path.dirname(configPath)
-    const dbPath = `${noteDir}/${APP_DB_NAME}`
-    debug('dbPath: %s', dbPath)
-
-    return ensureFile(dbPath).then(() => {
-      db = new Database({ path: dbPath })
-      return db.load()
-    }).then(() => db)
-  })
-}
-
-function save() {
-  return get().then(dbs => dbs.save())
-}
-
-function model(name, schema) {
-  if (models[name]) {
-    return Promise.resolve(models[name])
+    const path = this.dbPath
+    return ensureFile(path).then(() => {
+      this.db = new Database({ path })
+      return this.db.load()
+    }).then(() => this.db)
   }
 
-  return get().then(dbs => {
-    models[name] = dbs.model(name, schema)
-    return models[name]
-  })
-}
+  save() {
+    return this.get().then(db => db.save())
+  }
 
-export default {
-  get,
-  save,
-  model,
+  model(name, schema) {
+    return this.get().then(db => (
+      db.model(name, schema)
+    ))
+  }
 }
