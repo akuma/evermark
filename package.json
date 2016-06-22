@@ -23,7 +23,7 @@
     "lint": "eslint ./src/*.js ./src/**/*.js --quiet --fix",
     "validate": "npm run lint; npm outdated --depth 0",
     "test": "nyc --reporter=lcov --reporter=text ava",
-    "watchtest": "npm test -- --watch"
+    "test:watch": "npm test -- --watch"
   },
   "dependencies": {
     "babel-polyfill": "^6.9.1",
@@ -53,6 +53,7 @@
     "eslint-plugin-import": "^1.8.1",
     "ghooks": "^1.2.1",
     "nyc": "^6.6.1",
+    "sinon": "^1.17.4",
     "validate-commit-message": "^3.0.1"
   },
   "files": [

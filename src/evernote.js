@@ -1,26 +1,27 @@
 import Promise from 'bluebird'
 import { Evernote } from 'evernote'
 
+Promise.promisifyAll(Evernote.UserStoreClient.prototype)
+Promise.promisifyAll(Evernote.NoteStoreClient.prototype)
+
 const debug = require('debug')('evernote')
 
 export default class EvernoteClient {
-  constructor({ token = '', china = true, sandbox } = { china: true }) {
+  constructor({ token, china = true, sandbox = false } = { china: true, sandbox: false }) {
     if (!token) {
       throw new Error('Missing developer token')
     }
 
-    let serviceHost = sandbox ? 'sandbox.evernote.com' : 'www.evernote.com'
-    serviceHost = china ? 'app.yinxiang.com' : serviceHost
+    let serviceHost = china ? 'app.yinxiang.com' : 'www.evernote.com'
+    serviceHost = sandbox ? 'sandbox.evernote.com' : serviceHost
 
     const options = { token, sandbox, serviceHost }
     debug('options: %o', options)
+    this.options = options
+
     const client = new Evernote.Client(options)
-
-    const userStore = client.getUserStore()
-    this.checkVersion = Promise.promisify(userStore.checkVersion)
-
+    this.userStore = client.getUserStore()
     this.noteStore = client.getNoteStore()
-    Promise.promisifyAll(this.noteStore)
   }
 
   listNotebooks() {
