@@ -17,10 +17,12 @@ export default class DB {
     }
 
     const path = this.dbPath
-    return ensureFile(path).then(() => {
-      this.db = new Database({ path })
-      return this.db.load()
-    }).then(() => this.db)
+    return ensureFile(path)
+      .then(() => {
+        this.db = new Database({ path })
+        return this.db.load()
+      })
+      .then(() => this.db)
   }
 
   save() {
@@ -28,8 +30,6 @@ export default class DB {
   }
 
   model(name, schema) {
-    return this.get().then(db => (
-      db.model(name, schema)
-    ))
+    return this.get().then(db => db.model(name, schema))
   }
 }

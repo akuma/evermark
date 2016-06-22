@@ -58,18 +58,19 @@ export function writeFile(file, data) {
 export function searchFile(filename, dir = './') {
   const aDir = dir.endsWith('/') ? dir : `${dir}/`
   const currentPath = path.resolve(aDir, filename)
-  return exists(currentPath).then(isExists => {
-    if (isExists) {
-      return currentPath
-    }
+  return exists(currentPath)
+    .then(isExists => {
+      if (isExists) {
+        return currentPath
+      }
 
-    const nextPath = path.resolve(`${aDir}../`, filename)
-    if (nextPath === currentPath) {
-      return null
-    }
+      const nextPath = path.resolve(`${aDir}../`, filename)
+      if (nextPath === currentPath) {
+        return null
+      }
 
-    return searchFile(filename, `${aDir}../`)
-  })
+      return searchFile(filename, `${aDir}../`)
+    })
 }
 
 export default {
