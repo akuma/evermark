@@ -23,11 +23,8 @@ test('should getConfigPath', function* fn(t) {
   const configPath = yield config.getConfigPath(testDir)
   t.is(configPath, `${testDir}/evermark.json`)
 
-  try {
-    yield config.getConfigPath('/test')
-  } catch (e) {
-    t.is(e.message, 'Please run `evermark init [destination]` to init a new Evermark folder')
-  }
+  t.throws(config.getConfigPath('/test'),
+    'Please run `evermark init [destination]` to init a new Evermark folder')
 })
 
 test('should getDbPath', function* fn(t) {
@@ -47,11 +44,8 @@ test('should readConfig', function* fn(t) {
   t.false(conf.china)
   t.true(conf.sandbox)
 
-  try {
-    yield config.readConfig()
-  } catch (e) {
-    t.is(e.message, 'Please run `evermark init [destination]` to init a new Evermark folder')
-  }
+  t.throws(config.readConfig(),
+    'Please run `evermark init [destination]` to init a new Evermark folder')
 })
 
 test('should getConfig', function* fn(t) {
