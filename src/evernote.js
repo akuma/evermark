@@ -1,9 +1,6 @@
 import Promise from 'bluebird'
 import { Evernote } from 'evernote'
 
-Promise.promisifyAll(Evernote.UserStoreClient.prototype)
-Promise.promisifyAll(Evernote.NoteStoreClient.prototype)
-
 const debug = require('debug')('evernote')
 
 export default class EvernoteClient {
@@ -20,8 +17,11 @@ export default class EvernoteClient {
     this.options = options
 
     const client = new Evernote.Client(options)
-    this.userStore = client.getUserStore()
     this.noteStore = client.getNoteStore()
+
+    if (!this.noteStore.listNotebooksAsync) {
+      Promise.promisifyAll(this.noteStore)
+    }
   }
 
   listNotebooks() {
