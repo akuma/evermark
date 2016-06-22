@@ -44,7 +44,7 @@ test('should readConfig', function* fn(t) {
 
   const conf = yield config.readConfig(testDir)
   t.is(conf.token, 'foo')
-  t.true(conf.china)
+  t.false(conf.china)
   t.true(conf.sandbox)
 
   try {
@@ -64,7 +64,7 @@ test('should getConfig', function* fn(t) {
   const hello = yield config.getConfig('hello', testDir)
 
   t.is(token, 'foo')
-  t.true(china)
+  t.false(china)
   t.true(sandbox)
   t.is(hello, undefined)
 })
@@ -74,13 +74,13 @@ test('should setConfig', function* fn(t) {
   yield fileUtils.fs.copyAsync(fixturesDir, testDir)
 
   yield config.setConfig('token', 'bar', testDir)
-  yield config.setConfig('china', 'false', testDir)
-  yield config.setConfig('hello', 'true', testDir)
+  yield config.setConfig('china', 'true', testDir)
+  yield config.setConfig('hello', 'false', testDir)
   const conf = yield config.readConfig(testDir)
   t.is(conf.token, 'bar')
-  t.false(conf.china)
+  t.true(conf.china)
   t.true(conf.sandbox)
-  t.true(conf.hello)
+  t.false(conf.hello)
   t.is(conf.hi, undefined)
 })
 

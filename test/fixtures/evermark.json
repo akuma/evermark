@@ -1,5 +1,5 @@
 {
   "token": "foo",
-  "china": true,
+  "china": false,
   "sandbox": true
 }

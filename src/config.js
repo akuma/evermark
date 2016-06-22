@@ -16,14 +16,14 @@ export function* getConfigPath(dir = './') {
   return configPath
 }
 
-export function* getDbPath(dir) {
-  const configPath = yield getConfigPath(dir)
+export function* getDbPath(workDir) {
+  const configPath = yield getConfigPath(workDir)
   const dbDir = path.dirname(configPath)
   return `${dbDir}/${APP_DB_NAME}`
 }
 
-export function* readConfig(dir) {
-  const configPath = yield getConfigPath(dir)
+export function* readConfig(workDir) {
+  const configPath = yield getConfigPath(workDir)
 
   let config = null
   try {
@@ -44,13 +44,13 @@ export function* readConfig(dir) {
   return config
 }
 
-export function* getConfig(name, dir) {
-  const config = yield readConfig(dir)
+export function* getConfig(name, workDir) {
+  const config = yield readConfig(workDir)
   return config[name]
 }
 
-export function* setConfig(name, value, dir) {
-  const config = yield readConfig(dir)
+export function* setConfig(name, value, workDir) {
+  const config = yield readConfig(workDir)
 
   if (value === 'true') {
     config[name] = true
@@ -60,7 +60,7 @@ export function* setConfig(name, value, dir) {
     config[name] = value
   }
 
-  const configPath = yield getConfigPath(dir)
+  const configPath = yield getConfigPath(workDir)
   return yield saveConfig(configPath, config)
 }
 
