@@ -1,6 +1,6 @@
 import test from 'ava'
 import fileUtils from '../src/fileUtils'
-import * as config from '../src/config'
+import config from '../src/config'
 
 const fixturesDir = `${__dirname}/fixtures`
 
@@ -67,9 +67,28 @@ test('should setConfig', function* fn(t) {
   const testDir = getTestDir('e')
   yield fileUtils.fs.copyAsync(fixturesDir, testDir)
 
-  yield config.setConfig('token', 'bar', testDir)
-  yield config.setConfig('china', 'true', testDir)
-  yield config.setConfig('hello', 'false', testDir)
+  let result = yield config.setConfig('token', 'bar', testDir)
+  t.is(result, `{
+  "token": "bar",
+  "china": false,
+  "sandbox": true
+}`)
+
+  result = yield config.setConfig('china', 'true', testDir)
+  t.is(result, `{
+  "token": "bar",
+  "china": true,
+  "sandbox": true
+}`)
+
+  result = yield config.setConfig('hello', 'false', testDir)
+  t.is(result, `{
+  "token": "bar",
+  "china": true,
+  "sandbox": true,
+  "hello": false
+}`)
+
   const conf = yield config.readConfig(testDir)
   t.is(conf.token, 'bar')
   t.true(conf.china)
@@ -81,13 +100,19 @@ test('should setConfig', function* fn(t) {
 test('should initConfig', function* fn(t) {
   let testDir = getTestDir('f')
   yield config.initConfig(testDir)
+
   let conf = yield config.readConfig(testDir)
   t.is(conf.token, 'Your developer token')
   t.true(conf.china)
+  t.false(conf.sandbox)
+  t.is(conf.highlight, 'github')
 
   testDir = `${testDir}/`
   yield config.initConfig(testDir)
+
   conf = yield config.readConfig(testDir)
   t.is(conf.token, 'Your developer token')
   t.true(conf.china)
+  t.false(conf.sandbox)
+  t.is(conf.highlight, 'github')
 })

@@ -1,4 +1,5 @@
 import path from 'path'
+import Promise from 'bluebird'
 import fileUtils from './fileUtils'
 
 const debug = require('debug')('config')
@@ -35,7 +36,8 @@ export function readConfig(workDir) {
         config = JSON.parse(configStr)
       } catch (e) {
         throw new Error(
-          `Please write to ${configPath}:\n\n{\n  "token": "xxx",\n  "china": xxx\n}`, e)
+          `Please write to ${configPath}:\n\n` +
+          `{\n  "token": "xxx",\n  "china": xxx\n}`, e)
       }
 
       if (!config.token) {
@@ -51,8 +53,7 @@ export function readConfig(workDir) {
 }
 
 export function getConfig(name, workDir) {
-  return readConfig(workDir)
-    .then(config => config[name])
+  return readConfig(workDir).then(config => config[name])
 }
 
 export function setConfig(name, value, workDir) {
@@ -73,7 +74,12 @@ export function setConfig(name, value, workDir) {
 
 export function initConfig(destination = '.') {
   const dest = destination.endsWith('/') ? destination : `${destination}/`
-  const config = { token: 'Your developer token', china: true }
+  const config = {
+    token: 'Your developer token',
+    china: true,
+    sandbox: false,
+    highlight: 'github',
+  }
   return saveConfig(`${dest}${APP_CONFIG_NAME}`, config)
 }
 
@@ -89,5 +95,14 @@ function saveConfig(file, config) {
     return Promise.reject(e)
   }
 
-  return fileUtils.writeFile(file, configStr)
+  return fileUtils.writeFile(file, configStr).then(() => configStr)
+}
+
+export default {
+  getConfigPath,
+  getDbPath,
+  readConfig,
+  getConfig,
+  setConfig,
+  initConfig,
 }
