@@ -56,7 +56,7 @@ test('should save', async t => {
 
   data = await fileUtils.readFile(dbPath)
   json = JSON.parse(data)
-  t.deepEqual(json.models, { Test: [] })
+  t.deepEqual(json.models.Test, [])
 
   Test.destroy()
 })
