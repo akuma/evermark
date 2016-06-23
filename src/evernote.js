@@ -26,19 +26,31 @@ export default class EvernoteClient {
 
   listNotebooks() {
     return this.noteStore.listNotebooksAsync()
+      .catch(e => {
+        throw new Error(`Evernote API ${e}`)
+      })
   }
 
   createNotebook(name) {
     const notebook = new Evernote.Notebook()
     notebook.name = name
     return this.noteStore.createNotebookAsync(notebook)
+      .catch(e => {
+        throw new Error(`Evernote API ${e}`)
+      })
   }
 
   createNote(note) {
     return this.noteStore.createNoteAsync(note)
+      .catch(e => {
+        throw new Error(`Evernote API ${e}`)
+      })
   }
 
   updateNote(note) {
     return this.noteStore.updateNoteAsync(note)
+      .catch(e => {
+        throw new Error(`Evernote API ${e}`)
+      })
   }
 }

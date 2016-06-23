@@ -1,5 +1,6 @@
 import test from 'ava'
 import sinon from 'sinon'
+import Promise from 'bluebird'
 import { Evernote } from 'evernote'
 import EvernoteClient from '../src/evernote'
 
@@ -37,8 +38,8 @@ test('should create success if token parameter is not empty', function* fn(t) {
 test('should listNotebooks', async t => {
   const client = new EvernoteClient({ token })
 
-  const listNotebooksAsync = sinon.stub(
-    client.noteStore, 'listNotebooksAsync', () => Promise.resolve([]))
+  const listNotebooksAsync = sinon.stub(client.noteStore, 'listNotebooksAsync')
+    .returns(Promise.resolve([]))
   const notebooks = await client.listNotebooks()
   t.deepEqual(notebooks, [])
 
@@ -46,12 +47,25 @@ test('should listNotebooks', async t => {
   sinon.assert.calledWith(listNotebooksAsync)
 })
 
-test('should createNotebook', () => {
+test('should reject if listNotebooks error', t => {
   const client = new EvernoteClient({ token })
 
-  const createNotebookAsync = sinon.stub(client.noteStore, 'createNotebookAsync')
+  const error = new Error('mock error')
+  const listNotebooksAsync = sinon.stub(client.noteStore, 'listNotebooksAsync')
+    .returns(Promise.reject(error))
+  t.throws(client.listNotebooks(), 'Evernote API Error: mock error')
+
+  listNotebooksAsync.restore()
+  sinon.assert.calledWith(listNotebooksAsync)
+})
+
+test('should createNotebook', async () => {
+  const client = new EvernoteClient({ token })
+
   const notebookName = 'test'
-  client.createNotebook(notebookName)
+  const createNotebookAsync = sinon.stub(client.noteStore, 'createNotebookAsync')
+    .returns(Promise.resolve({ name: notebookName }))
+  await client.createNotebook(notebookName)
 
   createNotebookAsync.restore()
   const notebook = new Evernote.Notebook()
@@ -59,23 +73,66 @@ test('should createNotebook', () => {
   sinon.assert.calledWith(createNotebookAsync, notebook)
 })
 
-test('should createNote', () => {
+test('should reject if createNotebook error', t => {
   const client = new EvernoteClient({ token })
 
-  const createNoteAsync = sinon.stub(client.noteStore, 'createNoteAsync')
+  const error = new Error('mock error')
+  const createNotebookAsync = sinon.stub(client.noteStore, 'createNotebookAsync')
+    .returns(Promise.reject(error))
+  const notebookName = 'test'
+  t.throws(client.createNotebook(notebookName), 'Evernote API Error: mock error')
+
+  createNotebookAsync.restore()
+  const notebook = new Evernote.Notebook()
+  notebook.name = notebookName
+  sinon.assert.calledWith(createNotebookAsync, notebook)
+})
+
+test('should createNote', async () => {
+  const client = new EvernoteClient({ token })
+
   const note = new Evernote.Note()
-  client.createNote(note)
+  const createNoteAsync = sinon.stub(client.noteStore, 'createNoteAsync')
+    .returns(Promise.resolve(note))
+  await client.createNote(note)
 
   createNoteAsync.restore()
   sinon.assert.calledWith(createNoteAsync, note)
 })
 
-test('should createNote', () => {
+test('should reject if createNote error', t => {
   const client = new EvernoteClient({ token })
 
-  const updateNoteAsync = sinon.stub(client.noteStore, 'updateNoteAsync')
+  const error = new Error('mock error')
+  const createNoteAsync = sinon.stub(client.noteStore, 'createNoteAsync')
+    .returns(Promise.reject(error))
   const note = new Evernote.Note()
-  client.updateNote(note)
+  t.throws(client.createNote(note), 'Evernote API Error: mock error')
+
+  createNoteAsync.restore()
+  sinon.assert.calledWith(createNoteAsync, note)
+})
+
+test('should updateNote', async () => {
+  const client = new EvernoteClient({ token })
+
+  const note = new Evernote.Note()
+  const updateNoteAsync = sinon.stub(client.noteStore, 'updateNoteAsync')
+    .returns(Promise.resolve(note))
+  await client.updateNote(note)
+
+  updateNoteAsync.restore()
+  sinon.assert.calledWith(updateNoteAsync, note)
+})
+
+test('should reject if updateNote error', t => {
+  const client = new EvernoteClient({ token })
+
+  const error = new Error('mock error')
+  const updateNoteAsync = sinon.stub(client.noteStore, 'updateNoteAsync')
+    .returns(Promise.reject(error))
+  const note = new Evernote.Note()
+  t.throws(client.updateNote(note), 'Evernote API Error: mock error')
 
   updateNoteAsync.restore()
   sinon.assert.calledWith(updateNoteAsync, note)
