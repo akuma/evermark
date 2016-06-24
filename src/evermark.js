@@ -1,5 +1,4 @@
 import path from 'path'
-import crypto from 'crypto'
 import cheerio from 'cheerio'
 import inlineCss from 'inline-css'
 import hljs from 'highlight.js'
@@ -63,11 +62,11 @@ export default class Evermark {
   }
 
   * createLocalNote(title) {
-    const configPath = yield config.getConfigPath(this.workDir)
-    const noteDir = path.dirname(configPath)
-    const notePath = `${noteDir}/notes/${title}.md`
+    const configDir = yield this.getConfigDir()
+    const notePath = `${configDir}/notes/${title}.md`
     const isExists = yield fileUtils.exists(notePath)
     if (isExists) {
+      // TODO Auto rename file with number suffix, e.g. foo-1.md, foo-2.md
       throw new Error(`Note with filename ${title}.md is exists`)
     }
 
@@ -78,11 +77,19 @@ export default class Evermark {
 
   * publishNote(notePath) {
     const content = yield fileUtils.readFile(notePath)
-    return yield this.saveNote(content)
+
+    let relativePath = notePath
+    if (path.isAbsolute(notePath)) {
+      const configDir = yield this.getConfigDir()
+      relativePath = path.relative(configDir, notePath)
+    }
+
+    return yield this.saveNote(relativePath, content)
   }
 
-  * saveNote(content) {
+  * saveNote(notePath, content) {
     const note = new Evernote.Note()
+    note.localPath = notePath
     note.rawContent = content
 
     const noteAttrs = new Evernote.NoteAttributes()
@@ -116,17 +123,16 @@ export default class Evermark {
   }
 
   * doSaveNote(note) {
-    const aNote = note
     const db = yield this.getDB()
     const Note = yield db.model('notes', {
       guid: { type: String, required: true },
-      contentHash: { type: String, required: true },
+      path: { type: String, required: true },
       created: { type: Date, default: Date.now },
     })
 
-    let updateLocalNote = false
-    const contentHash = hash(aNote.rawContent)
-    const dbNote = Note.findOne({ contentHash })
+    let isLocalUpdate = false
+    const aNote = note
+    const dbNote = Note.findOne({ path: aNote.localPath })
     if (dbNote) {
       try {
         aNote.guid = dbNote.guid
@@ -134,16 +140,18 @@ export default class Evermark {
       } catch (e) {
         if (e.identifier === 'Note.guid') {
           delete aNote.guid
-          updateLocalNote = true
+          isLocalUpdate = true
         }
       }
     }
 
     const createdNote = yield this.createNote(aNote)
-    if (updateLocalNote) {
-      yield Note.update({ contentHash }, { guid: createdNote.guid, contentHash })
+    if (isLocalUpdate) {
+      console.log('isLocalUpdate:', isLocalUpdate)
+      yield Note.update({ path: aNote.localPath },
+        { guid: createdNote.guid, path: aNote.localPath })
     } else {
-      yield Note.insert({ guid: createdNote.guid, contentHash })
+      yield Note.insert({ guid: createdNote.guid, path: aNote.localPath })
     }
     yield db.save()
     return createdNote
@@ -156,6 +164,26 @@ export default class Evermark {
       notebook = yield this.createNotebook(name)
     }
     return notebook
+  }
+
+  listNotebooks() {
+    return this.getEvernoteClient()
+      .then(client => client.listNotebooks())
+  }
+
+  createNotebook(name) {
+    return this.getEvernoteClient()
+      .then(client => client.createNotebook(name))
+  }
+
+  createNote(note) {
+    return this.getEvernoteClient()
+      .then(client => client.createNote(note))
+  }
+
+  updateNote(note) {
+    return this.getEvernoteClient()
+      .then(client => client.updateNote(note))
   }
 
   getEvernoteClient() {
@@ -182,24 +210,9 @@ export default class Evermark {
       })
   }
 
-  listNotebooks() {
-    return this.getEvernoteClient()
-      .then(client => client.listNotebooks())
-  }
-
-  createNotebook(name) {
-    return this.getEvernoteClient()
-      .then(client => client.createNotebook(name))
-  }
-
-  createNote(note) {
-    return this.getEvernoteClient()
-      .then(client => client.createNote(note))
-  }
-
-  updateNote(note) {
-    return this.getEvernoteClient()
-      .then(client => client.updateNote(note))
+  * getConfigDir() {
+    const configPath = yield config.getConfigPath(this.workDir)
+    return path.dirname(configPath)
   }
 
   getDB() {
@@ -267,10 +280,4 @@ export default class Evermark {
     })
     return cheerio.load(inlineStyleHtml, { xmlMode: true }).html()
   }
-}
-
-function hash(str) {
-  const shasum = crypto.createHash('md5')
-  shasum.update(str)
-  return shasum.digest('hex')
 }
