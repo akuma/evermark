@@ -2,7 +2,7 @@ import test from 'ava'
 import sinon from 'sinon'
 import Promise from 'bluebird'
 import { Evernote } from 'evernote'
-import EvernoteClient from '../src/evernote'
+import EvernoteClient, { BAD_DATA_FORMAT } from '../src/evernote'
 
 const token = 'test'
 
@@ -50,10 +50,14 @@ test('should listNotebooks', async t => {
 test('should reject if listNotebooks error', t => {
   const client = new EvernoteClient({ token })
 
-  const error = new Error('mock error')
+  const error = new Error()
+  error.errorCode = BAD_DATA_FORMAT
+  error.parameter = 'Note.title'
+
   const listNotebooksAsync = sinon.stub(client.noteStore, 'listNotebooksAsync')
     .returns(Promise.reject(error))
-  t.throws(client.listNotebooks(), 'Evernote API Error: mock error')
+  t.throws(client.listNotebooks(), 'Evernote API Error: BAD_DATA_FORMAT\n' +
+    `The invalid parameter: ${error.parameter}`)
 
   listNotebooksAsync.restore()
   sinon.assert.calledWith(listNotebooksAsync)
@@ -76,11 +80,15 @@ test('should createNotebook', async () => {
 test('should reject if createNotebook error', t => {
   const client = new EvernoteClient({ token })
 
-  const error = new Error('mock error')
+  const error = new Error()
+  error.errorCode = BAD_DATA_FORMAT
+  error.parameter = 'Note.title'
+
   const createNotebookAsync = sinon.stub(client.noteStore, 'createNotebookAsync')
     .returns(Promise.reject(error))
   const notebookName = 'test'
-  t.throws(client.createNotebook(notebookName), 'Evernote API Error: mock error')
+  t.throws(client.createNotebook(notebookName), 'Evernote API Error: BAD_DATA_FORMAT\n' +
+    `The invalid parameter: ${error.parameter}`)
 
   createNotebookAsync.restore()
   const notebook = new Evernote.Notebook()
@@ -103,11 +111,15 @@ test('should createNote', async () => {
 test('should reject if createNote error', t => {
   const client = new EvernoteClient({ token })
 
-  const error = new Error('mock error')
+  const error = new Error()
+  error.errorCode = BAD_DATA_FORMAT
+  error.parameter = 'Note.title'
+
   const createNoteAsync = sinon.stub(client.noteStore, 'createNoteAsync')
     .returns(Promise.reject(error))
   const note = new Evernote.Note()
-  t.throws(client.createNote(note), 'Evernote API Error: mock error')
+  t.throws(client.createNote(note), 'Evernote API Error: BAD_DATA_FORMAT\n' +
+    `The invalid parameter: ${error.parameter}`)
 
   createNoteAsync.restore()
   sinon.assert.calledWith(createNoteAsync, note)
@@ -128,11 +140,15 @@ test('should updateNote', async () => {
 test('should reject if updateNote error', t => {
   const client = new EvernoteClient({ token })
 
-  const error = new Error('mock error')
+  const error = new Error()
+  error.errorCode = BAD_DATA_FORMAT
+  error.parameter = 'Note.title'
+
   const updateNoteAsync = sinon.stub(client.noteStore, 'updateNoteAsync')
     .returns(Promise.reject(error))
   const note = new Evernote.Note()
-  t.throws(client.updateNote(note), 'Evernote API Error: mock error')
+  t.throws(client.updateNote(note), 'Evernote API Error: BAD_DATA_FORMAT\n' +
+    `The invalid parameter: ${error.parameter}`)
 
   updateNoteAsync.restore()
   sinon.assert.calledWith(updateNoteAsync, note)
