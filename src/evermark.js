@@ -77,26 +77,28 @@ export default class Evermark {
 
   * publishNote(notePath) {
     const content = yield fileUtils.readFile(notePath)
-
-    let relativePath = notePath
-    if (path.isAbsolute(notePath)) {
-      const configDir = yield this.getConfigDir()
-      relativePath = path.relative(configDir, notePath)
-    }
-
-    return yield this.saveNote(relativePath, content)
+    return yield this.saveNote(notePath, content)
   }
 
   * saveNote(notePath, content) {
     const note = new Evernote.Note()
-    note.localPath = notePath
-    note.rawContent = content
 
     const noteAttrs = new Evernote.NoteAttributes()
     noteAttrs.source = APP_NAME
     noteAttrs.sourceApplication = APP_NAME
     noteAttrs.contentClass = APP_NAME // Make the note read-only
     note.attributes = noteAttrs
+
+    const configDir = yield this.getConfigDir()
+    if (path.isAbsolute(notePath)) {
+      note.absolutePath = notePath
+    } else {
+      note.absolutePath = path.resolve(process.cwd(), notePath)
+    }
+    note.relativePath = path.relative(configDir, note.absolutePath)
+
+    debug('absolute notePath: %s', note.absolutePath)
+    debug('relative notePath: %s', note.relativePath)
 
     const tokens = this.remarkable.parse(content, {})
     const noteInfo = this.parseNoteInfo(tokens)
@@ -132,11 +134,13 @@ export default class Evermark {
 
     let isLocalUpdate = false
     const aNote = note
-    const dbNote = Note.findOne({ path: aNote.localPath })
+    const dbNote = Note.findOne({ path: aNote.relativePath })
     if (dbNote) {
       try {
         aNote.guid = dbNote.guid
-        return yield this.updateNote(aNote)
+        const updatedNote = yield this.updateNote(aNote)
+        updatedNote.absolutePath = aNote.absolutePath
+        return updatedNote
       } catch (e) {
         if (e.code === OBJECT_NOT_FOUND) {
           delete aNote.guid
@@ -146,13 +150,16 @@ export default class Evermark {
     }
 
     const createdNote = yield this.createNote(aNote)
+    createdNote.absolutePath = aNote.absolutePath
+
     if (isLocalUpdate) {
-      yield Note.update({ path: aNote.localPath },
-        { guid: createdNote.guid, path: aNote.localPath })
+      yield Note.update({ path: aNote.relativePath },
+        { guid: createdNote.guid, path: aNote.relativePath })
     } else {
-      yield Note.insert({ guid: createdNote.guid, path: aNote.localPath })
+      yield Note.insert({ guid: createdNote.guid, path: aNote.relativePath })
     }
     yield db.save()
+
     return createdNote
   }
 

@@ -150,6 +150,6 @@ function publishNote(file) {
   co(function* fn() {
     const evermark = new Evermark()
     const note = yield evermark.publishNote(file)
-    logger.info(`Successfully publish note: ${magenta(note.title)}`)
+    logger.info(`Successfully publish note: ${magenta(note.absolutePath)}`)
   }).catch(e => logger.error(e.message))
 }
