@@ -59,15 +59,15 @@ function wrapError(exception) {
   const message = `Evernote API Error: ${codeStr}`
 
   if (exception.parameter) {
-    error.message = `${message}\nThe invalid parameter: ${exception.parameter}`
+    error.message = `${message}\n\nThe invalid parameter: ${exception.parameter}`
   }
 
   if (exception.message) {
-    error.message = `${message}\n${exception.message}`
+    error.message = `${message}\n\n${exception.message}`
   }
 
   if (exception.identifier) {
-    error.message = `${message}\nObject not found by identifier ${exception.identifier}`
+    error.message = `${message}\n\nObject not found by identifier ${exception.identifier}`
   }
 
   return error

@@ -56,7 +56,7 @@ test('should reject if listNotebooks error', t => {
 
   const listNotebooksAsync = sinon.stub(client.noteStore, 'listNotebooksAsync')
     .returns(Promise.reject(error))
-  t.throws(client.listNotebooks(), `Evernote API Error: INVALID_AUTH\n${error.message}`)
+  t.throws(client.listNotebooks(), `Evernote API Error: INVALID_AUTH\n\n${error.message}`)
 
   listNotebooksAsync.restore()
   sinon.assert.calledWith(listNotebooksAsync)
@@ -86,7 +86,7 @@ test('should reject if createNotebook error', t => {
   const createNotebookAsync = sinon.stub(client.noteStore, 'createNotebookAsync')
     .returns(Promise.reject(error))
   const notebookName = 'test'
-  t.throws(client.createNotebook(notebookName), 'Evernote API Error: BAD_DATA_FORMAT\n' +
+  t.throws(client.createNotebook(notebookName), 'Evernote API Error: BAD_DATA_FORMAT\n\n' +
     `The invalid parameter: ${error.parameter}`)
 
   createNotebookAsync.restore()
@@ -117,7 +117,7 @@ test('should reject if createNote error', t => {
   const createNoteAsync = sinon.stub(client.noteStore, 'createNoteAsync')
     .returns(Promise.reject(error))
   const note = new Evernote.Note()
-  t.throws(client.createNote(note), 'Evernote API Error: BAD_DATA_FORMAT\n' +
+  t.throws(client.createNote(note), 'Evernote API Error: BAD_DATA_FORMAT\n\n' +
     `The invalid parameter: ${error.parameter}`)
 
   createNoteAsync.restore()
@@ -146,7 +146,7 @@ test('should reject if updateNote error', t => {
 
   let updateNoteAsync = sinon.stub(client.noteStore, 'updateNoteAsync')
     .returns(Promise.reject(error))
-  t.throws(client.updateNote(note), 'Evernote API Error: BAD_DATA_FORMAT\n' +
+  t.throws(client.updateNote(note), 'Evernote API Error: BAD_DATA_FORMAT\n\n' +
     `The invalid parameter: ${error.parameter}`)
 
   updateNoteAsync.restore()
@@ -157,7 +157,7 @@ test('should reject if updateNote error', t => {
 
   updateNoteAsync = sinon.stub(client.noteStore, 'updateNoteAsync')
       .returns(Promise.reject(error))
-  t.throws(client.updateNote(note), 'Evernote API Error: OBJECT_NOT_FOUND\n' +
+  t.throws(client.updateNote(note), 'Evernote API Error: OBJECT_NOT_FOUND\n\n' +
       `Object not found by identifier ${error.identifier}`)
 
   updateNoteAsync.restore()

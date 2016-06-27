@@ -103,7 +103,7 @@ test('should create note if update note is not exist', function* fn() {
 
   const error = new Error()
   error.code = OBJECT_NOT_FOUND
-  error.message = 'Evernote API Error: OBJECT_NOT_FOUND\nObject not found by identifier Note.guid'
+  error.message = 'Evernote API Error: OBJECT_NOT_FOUND\n\nObject not found by identifier Note.guid'
 
   clientMock.expects('updateNote')
     .returns(Promise.reject(error))
@@ -138,7 +138,7 @@ test('should create notebook if it is not exist', function* fn() {
     .once()
   clientMock.expects('createNotebook')
     .withArgs(notebookName)
-    .returns(Promise.resolve([{ guid: 'notebook-b', name: notebookName }]))
+    .returns(Promise.resolve([{ guid: 'foo', name: notebookName }]))
     .once()
 
   const notePath = `${testDir}/notes/c.md`
