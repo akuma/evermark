@@ -2,7 +2,7 @@ import test from 'ava'
 import sinon from 'sinon'
 import Promise from 'bluebird'
 import { Evernote } from 'evernote'
-import EvernoteClient, { BAD_DATA_FORMAT } from '../src/evernote'
+import EvernoteClient, { BAD_DATA_FORMAT, INVALID_AUTH } from '../src/evernote'
 
 const token = 'test'
 
@@ -51,13 +51,12 @@ test('should reject if listNotebooks error', t => {
   const client = new EvernoteClient({ token })
 
   const error = new Error()
-  error.errorCode = BAD_DATA_FORMAT
-  error.parameter = 'Note.title'
+  error.errorCode = INVALID_AUTH
+  error.message = 'authenticationToken'
 
   const listNotebooksAsync = sinon.stub(client.noteStore, 'listNotebooksAsync')
     .returns(Promise.reject(error))
-  t.throws(client.listNotebooks(), 'Evernote API Error: BAD_DATA_FORMAT\n' +
-    `The invalid parameter: ${error.parameter}`)
+  t.throws(client.listNotebooks(), `Evernote API Error: INVALID_AUTH\n${error.message}`)
 
   listNotebooksAsync.restore()
   sinon.assert.calledWith(listNotebooksAsync)
@@ -139,16 +138,27 @@ test('should updateNote', async () => {
 
 test('should reject if updateNote error', t => {
   const client = new EvernoteClient({ token })
+  const note = new Evernote.Note()
 
-  const error = new Error()
+  let error = new Error()
   error.errorCode = BAD_DATA_FORMAT
   error.parameter = 'Note.title'
 
-  const updateNoteAsync = sinon.stub(client.noteStore, 'updateNoteAsync')
+  let updateNoteAsync = sinon.stub(client.noteStore, 'updateNoteAsync')
     .returns(Promise.reject(error))
-  const note = new Evernote.Note()
   t.throws(client.updateNote(note), 'Evernote API Error: BAD_DATA_FORMAT\n' +
     `The invalid parameter: ${error.parameter}`)
+
+  updateNoteAsync.restore()
+  sinon.assert.calledWith(updateNoteAsync, note)
+
+  error = new Error()
+  error.identifier = 'Note.guid'
+
+  updateNoteAsync = sinon.stub(client.noteStore, 'updateNoteAsync')
+      .returns(Promise.reject(error))
+  t.throws(client.updateNote(note), 'Evernote API Error: OBJECT_NOT_FOUND\n' +
+      `Object not found by identifier ${error.identifier}`)
 
   updateNoteAsync.restore()
   sinon.assert.calledWith(updateNoteAsync, note)

@@ -22,7 +22,7 @@
     "prepublish": "npm run build",
     "lint": "eslint ./src/*.js ./src/**/*.js --quiet --fix",
     "validate": "npm run lint; npm outdated --depth 0",
-    "test": "nyc --reporter=lcov --reporter=text ava",
+    "test": "nyc --reporter=lcov --reporter=text ava test/*.js",
     "test:watch": "npm test -- --watch"
   },
   "dependencies": {
@@ -68,7 +68,7 @@
   ],
   "config": {
     "ghooks": {
-      "pre-commit": "npm run lint; npm run test",
+      "pre-commit": "npm run lint; npm test",
       "commit-msg": "validate-commit-msg"
     },
     "commitizen": {

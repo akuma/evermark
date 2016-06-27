@@ -1,23 +1,25 @@
 import test from 'ava'
 import fileUtils from '../src/fileUtils'
 import config from '../src/config'
+import { randomString } from './helpers/utils'
 
 const fixturesDir = `${__dirname}/fixtures`
 
-function getTestDir(id) {
-  return `${__dirname}/config-test-${id}`
+function getTestDir(root = false) {
+  const rootDir = `${__dirname}/config-test`
+  return root ? rootDir : `${rootDir}/${randomString()}`
 }
 
 test.before(async () => {
-  await fileUtils.remove(getTestDir('*'))
+  await fileUtils.remove(getTestDir(true))
 })
 
 test.after(async () => {
-  await fileUtils.remove(getTestDir('*'))
+  await fileUtils.remove(getTestDir(true))
 })
 
 test('should getConfigPath', function* fn(t) {
-  const testDir = getTestDir('a')
+  const testDir = getTestDir()
   yield fileUtils.fs.copyAsync(fixturesDir, testDir)
 
   const configPath = yield config.getConfigPath(testDir)
@@ -28,7 +30,7 @@ test('should getConfigPath', function* fn(t) {
 })
 
 test('should getDbPath', function* fn(t) {
-  const testDir = getTestDir('b')
+  const testDir = getTestDir()
   yield fileUtils.fs.copyAsync(fixturesDir, testDir)
 
   const dbPath = yield config.getDbPath(testDir)
@@ -36,7 +38,7 @@ test('should getDbPath', function* fn(t) {
 })
 
 test('should readConfig', function* fn(t) {
-  const testDir = getTestDir('c')
+  const testDir = getTestDir()
   yield fileUtils.fs.copyAsync(fixturesDir, testDir)
 
   const conf = yield config.readConfig(testDir)
@@ -49,7 +51,7 @@ test('should readConfig', function* fn(t) {
 })
 
 test('should getConfig', function* fn(t) {
-  const testDir = getTestDir('d')
+  const testDir = getTestDir()
   yield fileUtils.fs.copyAsync(fixturesDir, testDir)
 
   const token = yield config.getConfig('token', testDir)
@@ -64,7 +66,7 @@ test('should getConfig', function* fn(t) {
 })
 
 test('should setConfig', function* fn(t) {
-  const testDir = getTestDir('e')
+  const testDir = getTestDir()
   yield fileUtils.fs.copyAsync(fixturesDir, testDir)
 
   let result = yield config.setConfig('token', 'bar', testDir)
@@ -98,7 +100,7 @@ test('should setConfig', function* fn(t) {
 })
 
 test('should initConfig', function* fn(t) {
-  let testDir = getTestDir('f')
+  let testDir = getTestDir()
   yield config.initConfig(testDir)
 
   let conf = yield config.readConfig(testDir)
