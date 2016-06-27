@@ -5,7 +5,7 @@ import hljs from 'highlight.js'
 import Remarkable from 'remarkable'
 import { Evernote } from 'evernote'
 import fileUtils from './fileUtils'
-import EvernoteClient from './evernote'
+import EvernoteClient, { OBJECT_NOT_FOUND } from './evernote'
 import DB from './db'
 import config, { APP_NAME } from './config'
 
@@ -138,7 +138,7 @@ export default class Evermark {
         aNote.guid = dbNote.guid
         return yield this.updateNote(aNote)
       } catch (e) {
-        if (e.identifier === 'Note.guid') {
+        if (e.code === OBJECT_NOT_FOUND) {
           delete aNote.guid
           isLocalUpdate = true
         }
@@ -147,7 +147,6 @@ export default class Evermark {
 
     const createdNote = yield this.createNote(aNote)
     if (isLocalUpdate) {
-      console.log('isLocalUpdate:', isLocalUpdate)
       yield Note.update({ path: aNote.localPath },
         { guid: createdNote.guid, path: aNote.localPath })
     } else {
