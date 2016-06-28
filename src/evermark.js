@@ -280,10 +280,13 @@ export default class Evermark {
     // Change html classes to inline styles
     const inlineStyleHtml = yield inlineCss(styleHtml, {
       url: '/',
-      xmlMode: false,
       removeStyleTags: true,
       removeHtmlSelectors: true,
     })
-    return cheerio.load(inlineStyleHtml, { xmlMode: true }).html()
+
+    // ENML is a superset of XHTML, so change html to xhtml
+    const inlineStyleXhtml = cheerio.load(inlineStyleHtml).xml()
+    debug('inlineStyleXhtml: %s', inlineStyleXhtml)
+    return inlineStyleXhtml
   }
 }
