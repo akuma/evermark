@@ -14,39 +14,39 @@ function getTestDir(root = false) {
   return root ? rootDir : `${rootDir}/${randomString()}`
 }
 
-test.before(function* fn() {
-  yield fileUtils.remove(getTestDir(true))
+test.before(async () => {
+  await fileUtils.remove(getTestDir(true))
 })
 
 test.after(async () => {
   await fileUtils.remove(getTestDir(true))
 })
 
-test('should createLocalNote', function* fn(t) {
+test('should createLocalNote', async t => {
   const testDir = getTestDir()
-  yield fileUtils.fs.copyAsync(fixturesDir, testDir)
+  await fileUtils.fs.copyAsync(fixturesDir, testDir)
   const evermark = new Evermark(testDir)
 
   const title = 'test'
-  const notePath = yield evermark.createLocalNote(title)
+  const notePath = await evermark.createLocalNote(title)
   t.is(notePath, `${testDir}/notes/${title}.md`)
 
-  const noteContent = yield fileUtils.readFile(notePath)
+  const noteContent = await fileUtils.readFile(notePath)
   t.is(noteContent, `# ${title}\n`)
 
   try {
-    yield evermark.createLocalNote(title)
+    await evermark.createLocalNote(title)
   } catch (e) {
     t.is(e.message, `Note with filename ${title}.md is exists`)
   }
 })
 
-test('should create note if it is not exist', function* fn() {
+test('should create note if it is not exist', async () => {
   const testDir = getTestDir()
-  yield fileUtils.fs.copyAsync(fixturesDir, testDir)
+  await fileUtils.fs.copyAsync(fixturesDir, testDir)
   const evermark = new Evermark(testDir)
 
-  const client = yield evermark.getEvernoteClient()
+  const client = await evermark.getEvernoteClient()
   const clientMock = sinon.mock(client)
 
   const note = new Evernote.Note()
@@ -58,18 +58,18 @@ test('should create note if it is not exist', function* fn() {
   clientMock.expects('updateNote').never()
 
   const notePath = `${testDir}/notes/a.md`
-  yield evermark.publishNote(notePath)
+  await evermark.publishNote(notePath)
 
   clientMock.verify()
   clientMock.restore()
 })
 
-test('should update note if it is exist', function* fn() {
+test('should update note if it is exist', async () => {
   const testDir = getTestDir()
-  yield fileUtils.fs.copyAsync(fixturesDir, testDir)
+  await fileUtils.fs.copyAsync(fixturesDir, testDir)
   const evermark = new Evermark(testDir)
 
-  const client = yield evermark.getEvernoteClient()
+  const client = await evermark.getEvernoteClient()
   const clientMock = sinon.mock(client)
 
   const note = new Evernote.Note()
@@ -83,19 +83,19 @@ test('should update note if it is exist', function* fn() {
     .once()
 
   const notePath = `${testDir}/notes/a.md`
-  yield evermark.publishNote(notePath)
-  yield evermark.publishNote(notePath)
+  await evermark.publishNote(notePath)
+  await evermark.publishNote(notePath)
 
   clientMock.verify()
   clientMock.restore()
 })
 
-test('should create note if update note is not exist', function* fn() {
+test('should create note if update note is not exist', async () => {
   const testDir = getTestDir()
-  yield fileUtils.fs.copyAsync(fixturesDir, testDir)
+  await fileUtils.fs.copyAsync(fixturesDir, testDir)
   const evermark = new Evermark(testDir)
 
-  const client = yield evermark.getEvernoteClient()
+  const client = await evermark.getEvernoteClient()
   const clientMock = sinon.mock(client)
 
   const note = new Evernote.Note()
@@ -112,18 +112,18 @@ test('should create note if update note is not exist', function* fn() {
     .returns(Promise.resolve(note))
     .once()
   const notePath = `${testDir}/notes/b.md`
-  yield evermark.publishNote(notePath)
+  await evermark.publishNote(notePath)
 
   clientMock.verify()
   clientMock.restore()
 })
 
-test('should create notebook if it is not exist', function* fn() {
+test('should create notebook if it is not exist', async () => {
   const testDir = getTestDir()
-  yield fileUtils.fs.copyAsync(fixturesDir, testDir)
+  await fileUtils.fs.copyAsync(fixturesDir, testDir)
   const evermark = new Evermark(testDir)
 
-  const client = yield evermark.getEvernoteClient()
+  const client = await evermark.getEvernoteClient()
   const clientMock = sinon.mock(client)
 
   const notebookName = 'foo'
@@ -142,18 +142,18 @@ test('should create notebook if it is not exist', function* fn() {
     .once()
 
   const notePath = `${testDir}/notes/c.md`
-  yield evermark.publishNote(notePath)
+  await evermark.publishNote(notePath)
 
   clientMock.verify()
   clientMock.restore()
 })
 
-test('should not create notebook if it is exist', function* fn() {
+test('should not create notebook if it is exist', async () => {
   const testDir = getTestDir()
-  yield fileUtils.fs.copyAsync(fixturesDir, testDir)
+  await fileUtils.fs.copyAsync(fixturesDir, testDir)
   const evermark = new Evermark(testDir)
 
-  const client = yield evermark.getEvernoteClient()
+  const client = await evermark.getEvernoteClient()
   const clientMock = sinon.mock(client)
 
   const notebookName = 'bar'
@@ -169,7 +169,7 @@ test('should not create notebook if it is exist', function* fn() {
   clientMock.expects('createNotebook').never()
 
   const notePath = `${testDir}/notes/d.md`
-  yield evermark.publishNote(notePath)
+  await evermark.publishNote(notePath)
 
   clientMock.verify()
   clientMock.restore()

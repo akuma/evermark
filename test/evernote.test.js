@@ -12,7 +12,7 @@ test('should throw error if token parameter is empty', t => {
   t.throws(() => new EvernoteClient({ token: '' }), 'Missing developer token')
 })
 
-test('should create success if token parameter is not empty', function* fn(t) {
+test('should create success if token parameter is not empty', t => {
   let client = new EvernoteClient({ token })
   t.true(client instanceof EvernoteClient)
   let opts = { token, sandbox: false, serviceHost: 'app.yinxiang.com' }

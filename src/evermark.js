@@ -1,4 +1,5 @@
 import path from 'path'
+import Promise from 'bluebird'
 import cheerio from 'cheerio'
 import inlineCss from 'inline-css'
 import hljs from 'highlight.js'
@@ -61,26 +62,26 @@ export default class Evermark {
     this.remarkable = remarkable
   }
 
-  * createLocalNote(title) {
-    const configDir = yield this.getConfigDir()
+  async createLocalNote(title) {
+    const configDir = await this.getConfigDir()
     const notePath = `${configDir}/notes/${title}.md`
-    const isExists = yield fileUtils.exists(notePath)
+    const isExists = await fileUtils.exists(notePath)
     if (isExists) {
       // TODO Auto rename file with number suffix, e.g. foo-1.md, foo-2.md
       throw new Error(`Note with filename ${title}.md is exists`)
     }
 
-    yield fileUtils.ensureFile(notePath)
-    yield fileUtils.writeFile(notePath, `# ${title}\n`)
+    await fileUtils.ensureFile(notePath)
+    await fileUtils.writeFile(notePath, `# ${title}\n`)
     return notePath
   }
 
-  * publishNote(notePath) {
-    const content = yield fileUtils.readFile(notePath)
-    return yield this.saveNote(notePath, content)
+  async publishNote(notePath) {
+    const content = await fileUtils.readFile(notePath)
+    return this.saveNote(notePath, content)
   }
 
-  * saveNote(notePath, content) {
+  async saveNote(notePath, content) {
     const note = new Evernote.Note()
 
     const noteAttrs = new Evernote.NoteAttributes()
@@ -89,7 +90,7 @@ export default class Evermark {
     noteAttrs.contentClass = APP_NAME // Make the note read-only
     note.attributes = noteAttrs
 
-    const configDir = yield this.getConfigDir()
+    const configDir = await this.getConfigDir()
     if (path.isAbsolute(notePath)) {
       note.absolutePath = notePath
     } else {
@@ -105,7 +106,7 @@ export default class Evermark {
     note.title = noteInfo.noteTitle
 
     if (noteInfo.notebookName) {
-      const createdNotebook = yield this.createNotebookIfPossible(noteInfo.notebookName)
+      const createdNotebook = await this.createNotebookIfPossible(noteInfo.notebookName)
       note.notebookGuid = createdNotebook.guid
     }
 
@@ -116,17 +117,17 @@ export default class Evermark {
     // The content of an Evernote note is represented using Evernote Markup Language
     // (ENML). The full ENML specification can be found in the Evernote API Overview
     // at http://dev.evernote.com/documentation/cloud/chapters/ENML.php
-    const htmlContent = yield this.generateHtml(tokens)
+    const htmlContent = await this.generateHtml(tokens)
     note.content = '<?xml version="1.0" encoding="UTF-8"?>' +
       '<!DOCTYPE en-note SYSTEM "http://xml.evernote.com/pub/enml2.dtd">' +
       `<en-note>${htmlContent}</en-note>`
 
-    return yield this.doSaveNote(note)
+    return this.doSaveNote(note)
   }
 
-  * doSaveNote(note) {
-    const db = yield this.getDB()
-    const Note = yield db.model('notes', {
+  async doSaveNote(note) {
+    const db = await this.getDB()
+    const Note = await db.model('notes', {
       guid: { type: String, required: true },
       path: { type: String, required: true },
       created: { type: Date, default: Date.now },
@@ -138,7 +139,7 @@ export default class Evermark {
     if (dbNote) {
       try {
         aNote.guid = dbNote.guid
-        const updatedNote = yield this.updateNote(aNote)
+        const updatedNote = await this.updateNote(aNote)
         updatedNote.absolutePath = aNote.absolutePath
         return updatedNote
       } catch (e) {
@@ -149,25 +150,25 @@ export default class Evermark {
       }
     }
 
-    const createdNote = yield this.createNote(aNote)
+    const createdNote = await this.createNote(aNote)
     createdNote.absolutePath = aNote.absolutePath
 
     if (isLocalUpdate) {
-      yield Note.update({ path: aNote.relativePath },
+      await Note.update({ path: aNote.relativePath },
         { guid: createdNote.guid, path: aNote.relativePath })
     } else {
-      yield Note.insert({ guid: createdNote.guid, path: aNote.relativePath })
+      await Note.insert({ guid: createdNote.guid, path: aNote.relativePath })
     }
-    yield db.save()
+    await db.save()
 
     return createdNote
   }
 
-  * createNotebookIfPossible(name) {
-    const notebooks = yield this.listNotebooks()
+  async createNotebookIfPossible(name) {
+    const notebooks = await this.listNotebooks()
     let notebook = notebooks.find(nb => nb.name === name)
     if (!notebook) {
-      notebook = yield this.createNotebook(name)
+      notebook = await this.createNotebook(name)
     }
     return notebook
   }
@@ -216,8 +217,8 @@ export default class Evermark {
       })
   }
 
-  * getConfigDir() {
-    const configPath = yield config.getConfigPath(this.workDir)
+  async getConfigDir() {
+    const configPath = await config.getConfigPath(this.workDir)
     return path.dirname(configPath)
   }
 
@@ -260,25 +261,25 @@ export default class Evermark {
     return { noteTitle, notebookName, tagNames }
   }
 
-  * generateHtml(tokens = []) {
+  async generateHtml(tokens = []) {
     const markedHtml = this.remarkable.renderer.render(tokens, this.remarkable.options)
     debug('markedHtml: %s', markedHtml)
 
     // Get highlight theme from configuration
-    const conf = yield this.getConfig()
+    const conf = await this.getConfig()
     const highlightTheme = conf.highlight || DEFAULT_HIGHLIGHT_THEME
 
     // Html with styles
-    const styles = yield [
+    const styles = await Promise.all([
       fileUtils.readFile(`${MARKDOWN_THEME_PATH}/github.css`),
       fileUtils.readFile(`${HIGHLIGHT_THEME_PATH}/${highlightTheme}.css`),
-    ]
+    ])
     const styleHtml = `<style>${styles[0]}${styles[1]}</style>` +
       `<div class="markdown-body">${markedHtml}</div>`
     debug('styleHtml: %s', styleHtml)
 
     // Change html classes to inline styles
-    const inlineStyleHtml = yield inlineCss(styleHtml, {
+    const inlineStyleHtml = await inlineCss(styleHtml, {
       url: '/',
       removeStyleTags: true,
       removeHtmlSelectors: true,

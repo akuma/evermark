@@ -18,30 +18,30 @@ test.after(async () => {
   await fileUtils.remove(getTestDir(true))
 })
 
-test('should getConfigPath', function* fn(t) {
+test('should getConfigPath', async t => {
   const testDir = getTestDir()
-  yield fileUtils.fs.copyAsync(fixturesDir, testDir)
+  await fileUtils.fs.copyAsync(fixturesDir, testDir)
 
-  const configPath = yield config.getConfigPath(testDir)
+  const configPath = await config.getConfigPath(testDir)
   t.is(configPath, `${testDir}/evermark.json`)
 
   t.throws(config.getConfigPath('/test'),
     'Please run `evermark init [destination]` to init a new Evermark folder')
 })
 
-test('should getDbPath', function* fn(t) {
+test('should getDbPath', async t => {
   const testDir = getTestDir()
-  yield fileUtils.fs.copyAsync(fixturesDir, testDir)
+  await fileUtils.fs.copyAsync(fixturesDir, testDir)
 
-  const dbPath = yield config.getDbPath(testDir)
+  const dbPath = await config.getDbPath(testDir)
   t.is(dbPath, `${testDir}/evermark.db`)
 })
 
-test('should readConfig', function* fn(t) {
+test('should readConfig', async t => {
   const testDir = getTestDir()
-  yield fileUtils.fs.copyAsync(fixturesDir, testDir)
+  await fileUtils.fs.copyAsync(fixturesDir, testDir)
 
-  const conf = yield config.readConfig(testDir)
+  const conf = await config.readConfig(testDir)
   t.is(conf.token, 'foo')
   t.false(conf.china)
   t.true(conf.sandbox)
@@ -50,14 +50,14 @@ test('should readConfig', function* fn(t) {
     'Please run `evermark init [destination]` to init a new Evermark folder')
 })
 
-test('should getConfig', function* fn(t) {
+test('should getConfig', async t => {
   const testDir = getTestDir()
-  yield fileUtils.fs.copyAsync(fixturesDir, testDir)
+  await fileUtils.fs.copyAsync(fixturesDir, testDir)
 
-  const token = yield config.getConfig('token', testDir)
-  const china = yield config.getConfig('china', testDir)
-  const sandbox = yield config.getConfig('sandbox', testDir)
-  const hello = yield config.getConfig('hello', testDir)
+  const token = await config.getConfig('token', testDir)
+  const china = await config.getConfig('china', testDir)
+  const sandbox = await config.getConfig('sandbox', testDir)
+  const hello = await config.getConfig('hello', testDir)
 
   t.is(token, 'foo')
   t.false(china)
@@ -65,25 +65,25 @@ test('should getConfig', function* fn(t) {
   t.is(hello, undefined)
 })
 
-test('should setConfig', function* fn(t) {
+test('should setConfig', async t => {
   const testDir = getTestDir()
-  yield fileUtils.fs.copyAsync(fixturesDir, testDir)
+  await fileUtils.fs.copyAsync(fixturesDir, testDir)
 
-  let result = yield config.setConfig('token', 'bar', testDir)
+  let result = await config.setConfig('token', 'bar', testDir)
   t.is(result, `{
   "token": "bar",
   "china": false,
   "sandbox": true
 }`)
 
-  result = yield config.setConfig('china', 'true', testDir)
+  result = await config.setConfig('china', 'true', testDir)
   t.is(result, `{
   "token": "bar",
   "china": true,
   "sandbox": true
 }`)
 
-  result = yield config.setConfig('hello', 'false', testDir)
+  result = await config.setConfig('hello', 'false', testDir)
   t.is(result, `{
   "token": "bar",
   "china": true,
@@ -91,7 +91,7 @@ test('should setConfig', function* fn(t) {
   "hello": false
 }`)
 
-  const conf = yield config.readConfig(testDir)
+  const conf = await config.readConfig(testDir)
   t.is(conf.token, 'bar')
   t.true(conf.china)
   t.true(conf.sandbox)
@@ -99,20 +99,20 @@ test('should setConfig', function* fn(t) {
   t.is(conf.hi, undefined)
 })
 
-test('should initConfig', function* fn(t) {
+test('should initConfig', async t => {
   let testDir = getTestDir()
-  yield config.initConfig(testDir)
+  await config.initConfig(testDir)
 
-  let conf = yield config.readConfig(testDir)
+  let conf = await config.readConfig(testDir)
   t.is(conf.token, 'Your developer token')
   t.true(conf.china)
   t.false(conf.sandbox)
   t.is(conf.highlight, 'github')
 
   testDir = `${testDir}/`
-  yield config.initConfig(testDir)
+  await config.initConfig(testDir)
 
-  conf = yield config.readConfig(testDir)
+  conf = await config.readConfig(testDir)
   t.is(conf.token, 'Your developer token')
   t.true(conf.china)
   t.false(conf.sandbox)
