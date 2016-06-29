@@ -81,6 +81,27 @@ export default class Evermark {
     return this.saveNote(notePath, content)
   }
 
+  async unpublishNote(notePath) {
+    const db = await this.getDB()
+    const Note = await db.model('notes', {
+      guid: { type: String, required: true },
+      path: { type: String, required: true },
+      created: { type: Date, default: Date.now },
+    })
+
+    const { absolutePath, relativePath } = await this.getNotePathInfo(notePath)
+    const note = Note.findOne({ path: relativePath })
+
+    if (!note) {
+      throw new Error(`${notePath} is not a published note`)
+    }
+
+    await this.expungeNote(note.guid)
+    await Note.remove({ path: relativePath })
+    await db.save()
+    return absolutePath
+  }
+
   async saveNote(notePath, content) {
     const note = new Evernote.Note()
 
@@ -90,16 +111,9 @@ export default class Evermark {
     noteAttrs.contentClass = APP_NAME // Make the note read-only
     note.attributes = noteAttrs
 
-    const configDir = await this.getConfigDir()
-    if (path.isAbsolute(notePath)) {
-      note.absolutePath = notePath
-    } else {
-      note.absolutePath = path.resolve(process.cwd(), notePath)
-    }
-    note.relativePath = path.relative(configDir, note.absolutePath)
-
-    debug('absolute notePath: %s', note.absolutePath)
-    debug('relative notePath: %s', note.relativePath)
+    const { absolutePath, relativePath } = await this.getNotePathInfo(notePath)
+    note.absolutePath = absolutePath
+    note.relativePath = relativePath
 
     const tokens = this.remarkable.parse(content, {})
     const noteInfo = this.parseNoteInfo(tokens)
@@ -193,6 +207,11 @@ export default class Evermark {
       .then(client => client.updateNote(note))
   }
 
+  expungeNote(guid) {
+    return this.getEvernoteClient()
+      .then(client => client.expungeNote(guid))
+  }
+
   getEvernoteClient() {
     if (this.evernoteClient) {
       return Promise.resolve(this.evernoteClient)
@@ -232,6 +251,16 @@ export default class Evermark {
         this.db = new DB(dbPath)
         return this.db
       })
+  }
+
+  async getNotePathInfo(notePath) {
+    const configDir = await this.getConfigDir()
+    const absolutePath = path.isAbsolute(notePath) ?
+      notePath : path.resolve(notePath)
+    const relativePath = path.relative(configDir, absolutePath)
+    debug('absolute notePath: %s', absolutePath)
+    debug('relative notePath: %s', relativePath)
+    return { absolutePath, relativePath }
   }
 
   parseNoteInfo(tokens = []) {

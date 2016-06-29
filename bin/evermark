@@ -54,6 +54,14 @@ const commands = {
       '<file>': 'Note file path.',
     },
   },
+  unpublish: {
+    cmd: 'unpublish <file>',
+    desc: 'Remove a note from Evernote.',
+    action: unpublish,
+    args: {
+      '<file>': 'Note file path.',
+    },
+  },
   help: {
     cmd: 'help [command]',
     desc: 'Get help on a command.',
@@ -151,5 +159,13 @@ function publishNote(file) {
     const evermark = new Evermark()
     const note = yield evermark.publishNote(file)
     logger.info(`Successfully publish note: ${magenta(note.absolutePath)}`)
+  }).catch(e => logger.error(e.message))
+}
+
+function unpublish(file) {
+  co(function* fn() {
+    const evermark = new Evermark()
+    const notePath = yield evermark.unpublishNote(file)
+    logger.info(`Successfully unpublish note: ${magenta(notePath)}`)
   }).catch(e => logger.error(e.message))
 }

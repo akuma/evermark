@@ -22,7 +22,7 @@ test.after(async () => {
   await fileUtils.remove(getTestDir(true))
 })
 
-test('should createLocalNote', async t => {
+test('should create local note', async t => {
   const testDir = getTestDir()
   await fileUtils.fs.copyAsync(fixturesDir, testDir)
   const evermark = new Evermark(testDir)
@@ -170,6 +170,32 @@ test('should not create notebook if it is exist', async () => {
 
   const notePath = `${testDir}/notes/d.md`
   await evermark.publishNote(notePath)
+
+  clientMock.verify()
+  clientMock.restore()
+})
+
+test('should unpublish note', async t => {
+  const testDir = getTestDir()
+  await fileUtils.fs.copyAsync(fixturesDir, testDir)
+  const evermark = new Evermark(testDir)
+
+  const client = await evermark.getEvernoteClient()
+  const clientMock = sinon.mock(client)
+
+  const note = new Evernote.Note()
+  note.guid = 'a'
+
+  clientMock.expects('createNote').returns(Promise.resolve(note))
+  clientMock.expects('expungeNote').returns(Promise.resolve(1))
+
+  const notePath = `${testDir}/notes/a.md`
+  await evermark.publishNote(notePath)
+  const result = await evermark.unpublishNote(notePath)
+  t.is(result, notePath)
+
+  t.throws(evermark.unpublishNote('/not/exist/note.md'),
+    '/not/exist/note.md is not a published note')
 
   clientMock.verify()
   clientMock.restore()
