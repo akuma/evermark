@@ -34,31 +34,50 @@ npm install -g evermark
 
 ## 命令说明
 
-初始化笔记目录
+### 初始化 Evermark 文件夹
+
+执行完后需要修改该目录下的 `evermark.json`，填写你的 `developerToken`。
 
 ```bash
 evermark init <destination>
 ```
 
-查看或修改配置
+`developerToken` 的生成链接：
+
+- Evernote：https://www.evernote.com/api/DeveloperToken.action
+- 印象笔记：https://app.yinxiang.com/api/DeveloperToken.action
+
+### 查看或修改配置
 
 ```bash
 evermark config [name] [value]
 ```
 
-添加笔记文件（创建一个本地的 markdown 文件）
+### 添加笔记文件
+
+创建一个 markdown 文件，存放在 Evermark 文件夹的 `notes` 目录下。
 
 ```bash
 evermark new <title>
 ```
 
-发布笔记（将 markdown 文件发布到 Evernote，对于已发布过的文件会采取更新操作）
+### 发布笔记
+
+将 markdown 文件发布到 Evernote，对于已发布过的文件会采取更新操作。
 
 ```bash
 evermark publish <file>
 ```
 
-查看帮助
+### 删除发布的笔记
+
+在 Evernote 中删除 markdown 文件对应的笔记，markdown 文件不会删除。
+
+```bash
+evermark unpublish <file>
+```
+
+### 查看帮助
 
 ```bash
 evermark help [command]
