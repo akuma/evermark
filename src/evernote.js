@@ -123,4 +123,11 @@ export default class EvernoteClient {
         throw wrapError(e)
       })
   }
+
+  expungeNote(guid) {
+    return this.noteStore.expungeNoteAsync(guid)
+      .catch(e => {
+        throw wrapError(e)
+      })
+  }
 }

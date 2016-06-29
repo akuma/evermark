@@ -158,8 +158,36 @@ test('should reject if updateNote error', t => {
   updateNoteAsync = sinon.stub(client.noteStore, 'updateNoteAsync')
       .returns(Promise.reject(error))
   t.throws(client.updateNote(note), 'Evernote API Error: OBJECT_NOT_FOUND\n\n' +
-      `Object not found by identifier ${error.identifier}`)
+    `Object not found by identifier ${error.identifier}`)
 
   updateNoteAsync.restore()
   sinon.assert.calledWith(updateNoteAsync, note)
+})
+
+test('should expungeNote', async () => {
+  const client = new EvernoteClient({ token })
+
+  const guid = '45717817-14b2-4599-8c8e-5b3db78e8eb3'
+  const expungeNoteAsync = sinon.stub(client.noteStore, 'expungeNoteAsync')
+    .returns(Promise.resolve(1))
+  await client.expungeNote(guid)
+
+  expungeNoteAsync.restore()
+  sinon.assert.calledWith(expungeNoteAsync, guid)
+})
+
+test('should reject if expungeNote error', async t => {
+  const client = new EvernoteClient({ token })
+
+  const error = new Error()
+  error.identifier = 'Note.guid'
+
+  const guid = '45717817-14b2-4599-8c8e-5b3db78e8eb3'
+  const expungeNoteAsync = sinon.stub(client.noteStore, 'expungeNoteAsync')
+    .returns(Promise.reject(error))
+  t.throws(client.expungeNote(guid), 'Evernote API Error: OBJECT_NOT_FOUND\n\n' +
+    `Object not found by identifier ${error.identifier}`)
+
+  expungeNoteAsync.restore()
+  sinon.assert.calledWith(expungeNoteAsync, guid)
 })
