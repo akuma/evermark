@@ -38,7 +38,7 @@ test('should create local note', async t => {
   noteContent = await fileUtils.readFile(notePath)
   t.is(noteContent, `# ${title}\n`)
 
-  title = '/-foo/---bar'
+  title = '/-foo/---bar///---'
   notePath = await evermark.createLocalNote(title)
   t.is(notePath, `${testDir}/notes/foo-bar.md`)
   noteContent = await fileUtils.readFile(notePath)

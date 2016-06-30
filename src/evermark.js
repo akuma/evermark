@@ -66,7 +66,7 @@ export default class Evermark {
     const configDir = await this.getConfigDir()
 
     // Remove some chars from title
-    const filename = title.replace(/(\/|-)+/g, '-').replace(/^-/, '')
+    const filename = title.replace(/(\/|-)+/g, '-').replace(/^-|-$/g, '')
 
     // Get unique note path and create note file
     const notePath = await fileUtils.uniquePath(`${configDir}/notes/${filename}.md`)
