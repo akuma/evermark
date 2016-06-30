@@ -69,7 +69,7 @@ evermark new <title>
 evermark publish <file>
 ```
 
-### 删除发布的笔记
+### 撤销笔记
 
 在 Evernote 中删除 markdown 文件对应的笔记，markdown 文件不会删除。
 
