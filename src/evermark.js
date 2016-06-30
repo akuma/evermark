@@ -64,15 +64,14 @@ export default class Evermark {
 
   async createLocalNote(title) {
     const configDir = await this.getConfigDir()
-    const notePath = `${configDir}/notes/${title}.md`
-    const isExists = await fileUtils.exists(notePath)
-    if (isExists) {
-      // TODO Auto rename file with number suffix, e.g. foo-1.md, foo-2.md
-      throw new Error(`Note with filename ${title}.md is exists`)
-    }
 
-    await fileUtils.ensureFile(notePath)
+    // Remove some chars from title
+    const filename = title.replace(/(\/|-)+/g, '-').replace(/^-/, '')
+
+    // Get unique note path and create note file
+    const notePath = await fileUtils.uniquePath(`${configDir}/notes/${filename}.md`)
     await fileUtils.writeFile(notePath, `# ${title}\n`)
+
     return notePath
   }
 

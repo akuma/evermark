@@ -27,18 +27,32 @@ test('should create local note', async t => {
   await fileUtils.fs.copyAsync(fixturesDir, testDir)
   const evermark = new Evermark(testDir)
 
-  const title = 'test'
-  const notePath = await evermark.createLocalNote(title)
+  let title = 'test'
+  let notePath = await evermark.createLocalNote(title)
   t.is(notePath, `${testDir}/notes/${title}.md`)
-
-  const noteContent = await fileUtils.readFile(notePath)
+  let noteContent = await fileUtils.readFile(notePath)
   t.is(noteContent, `# ${title}\n`)
 
-  try {
-    await evermark.createLocalNote(title)
-  } catch (e) {
-    t.is(e.message, `Note with filename ${title}.md is exists`)
-  }
+  notePath = await evermark.createLocalNote(title)
+  t.is(notePath, `${testDir}/notes/${title}-1.md`)
+  noteContent = await fileUtils.readFile(notePath)
+  t.is(noteContent, `# ${title}\n`)
+
+  title = '/-foo/---bar'
+  notePath = await evermark.createLocalNote(title)
+  t.is(notePath, `${testDir}/notes/foo-bar.md`)
+  noteContent = await fileUtils.readFile(notePath)
+  t.is(noteContent, `# ${title}\n`)
+
+  notePath = await evermark.createLocalNote(title)
+  t.is(notePath, `${testDir}/notes/foo-bar-1.md`)
+  noteContent = await fileUtils.readFile(notePath)
+  t.is(noteContent, `# ${title}\n`)
+
+  notePath = await evermark.createLocalNote(title)
+  t.is(notePath, `${testDir}/notes/foo-bar-2.md`)
+  noteContent = await fileUtils.readFile(notePath)
+  t.is(noteContent, `# ${title}\n`)
 })
 
 test('should create note if it is not exist', async () => {
