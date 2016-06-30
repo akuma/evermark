@@ -60,7 +60,7 @@ test('should readFile & writeFile', async t => {
   t.is(content, '测试')
 
   content = await fileUtils.readFile(file, 'base64')
-  t.is(content, '5rWL6K+V')
+  t.is(content, new Buffer('测试').toString('base64'))
 })
 
 test('should searchFile', async t => {
@@ -88,4 +88,22 @@ test('should searchFile', async t => {
 
   result = await fileUtils.searchFile('not-exists-file.txt')
   t.is(result, null)
+})
+
+test('should get unique file path', async t => {
+  await Promise.all([
+    fileUtils.ensureFile(`${testDir}/e.txt`),
+    fileUtils.ensureFile(`${testDir}/e-12.txt`),
+    fileUtils.ensureFile(`${testDir}/e-010.txt`),
+    fileUtils.ensureFile(`${testDir}/e-5.txt`),
+    fileUtils.ensureFile(`${testDir}/f-011.md`),
+    fileUtils.ensureFile(`${testDir}/g.md`),
+    fileUtils.ensureFile(`${testDir}/h`),
+    fileUtils.ensureFile(`${testDir}/h-100`),
+  ])
+
+  t.is(await fileUtils.uniquePath(`${testDir}/e.txt`), `${testDir}/e-13.txt`)
+  t.is(await fileUtils.uniquePath(`${testDir}/f.txt`), `${testDir}/f.txt`)
+  t.is(await fileUtils.uniquePath(`${testDir}/g.md`), `${testDir}/g-1.md`)
+  t.is(await fileUtils.uniquePath(`${testDir}/h`), `${testDir}/h-101`)
 })

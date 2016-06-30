@@ -73,6 +73,41 @@ export function searchFile(filename, dir = './') {
     })
 }
 
+/**
+ * 获取目录下唯一的文件名，如果同名文件已经存在，则自动添加数字编号。
+ * 返回文件名的全路径，例如：/test/foo-1.txt，/test/bar-2.txt。
+ */
+export function uniquePath(file) {
+  const absolutePath = path.resolve(file)
+  const dirname = path.dirname(absolutePath)
+  const extname = path.extname(absolutePath)
+  const basename = path.basename(file, extname)
+  const filenameRegex = new RegExp(`${basename}-(\\d+)${extname}`)
+
+  return exists(absolutePath)
+    .then(exist => (exist ? fs.readdirAsync(dirname) : absolutePath))
+    .then(result => {
+      if (Array.isArray(result) && result.length) {
+        let maxSerial = 0
+
+        const files = result.filter(name => filenameRegex.test(name))
+          .sort((a, b) => {
+            const an = a.replace(filenameRegex, '$1')
+            const bn = b.replace(filenameRegex, '$1')
+            return parseInt(an, 10) - parseInt(bn, 10)
+          })
+        if (files.length) {
+          const maxSerialFilename = files[files.length - 1]
+          maxSerial = parseInt(maxSerialFilename.replace(filenameRegex, '$1'), 10)
+        }
+
+        return `${dirname}/${basename}-${maxSerial + 1}${extname}`
+      }
+
+      return absolutePath
+    })
+}
+
 export default {
   fs,
   exists,
@@ -82,4 +117,5 @@ export default {
   readFile,
   writeFile,
   searchFile,
+  uniquePath,
 }
