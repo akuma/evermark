@@ -4,6 +4,7 @@
 /* eslint import/no-unresolved: 0 */
 
 require('babel-polyfill')
+const os = require('os')
 const co = require('co')
 const chalk = require('chalk')
 const program = require('commander')
@@ -90,6 +91,11 @@ function bold(command) {
   return chalk.bold(command)
 }
 
+function tildify(str) {
+  const home = os.homedir()
+  return magenta((str.indexOf(home) === 0 ? str.replace(home, '~') : str))
+}
+
 function commandHelp(cmd) {
   const command = commands[cmd]
   if (command) {
@@ -123,7 +129,7 @@ function init(destination) {
   co(function* fn() {
     yield config.initConfig(destination)
     logger.info('Evermark folder has been initialized.\n      ' +
-      'Update the token in `evermark.json` then you can add some notes.')
+      'Update the token in "evermark.json" then you can add some notes.')
   }).catch(e => logger.error(e.message))
 }
 
@@ -142,7 +148,7 @@ function getOrSetConfig(name, value) {
     }
 
     const conf = yield config.setConfig(name, value)
-    logger.info(`Successfully updated config:\n\n${conf}`)
+    logger.info(`Updated config:\n\n${conf}`)
   }).catch(e => logger.error(e.message))
 }
 
@@ -150,7 +156,7 @@ function newNote(title) {
   co(function* fn() {
     const evermark = new Evermark()
     const notePath = yield evermark.createLocalNote(title)
-    logger.info(`Successfully created local note: ${magenta(notePath)}`)
+    logger.info(`Created local note: ${tildify(notePath)}`)
   }).catch(e => logger.error(e.message))
 }
 
@@ -158,7 +164,7 @@ function publishNote(file) {
   co(function* fn() {
     const evermark = new Evermark()
     const note = yield evermark.publishNote(file)
-    logger.info(`Successfully publish note: ${magenta(note.absolutePath)}`)
+    logger.info(`Published note: ${tildify(note.absolutePath)}`)
   }).catch(e => logger.error(e.message))
 }
 
@@ -166,6 +172,6 @@ function unpublish(file) {
   co(function* fn() {
     const evermark = new Evermark()
     const notePath = yield evermark.unpublishNote(file)
-    logger.info(`Successfully unpublish note: ${magenta(notePath)}`)
+    logger.info(`Unpublished note: ${tildify(notePath)}`)
   }).catch(e => logger.error(e.message))
 }
