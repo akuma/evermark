@@ -44,8 +44,8 @@ evermark init <destination>
 
 `developerToken` 的生成链接：
 
-- Evernote：https://www.evernote.com/api/DeveloperToken.action
-- 印象笔记：https://app.yinxiang.com/api/DeveloperToken.action
+- [Evernote International](https://www.evernote.com/api/DeveloperToken.action)
+- [印象笔记](https://app.yinxiang.com/api/DeveloperToken.action)
 
 ### 查看或修改配置
 
