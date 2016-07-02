@@ -41,7 +41,7 @@ const commands = {
   },
   new: {
     cmd: 'new <title>',
-    desc: 'Create a new note.',
+    desc: 'Create a new local note.',
     action: newNote,
     args: {
       '<title>': 'Note title. Wrap it with quotations to escape.',
@@ -49,7 +49,7 @@ const commands = {
   },
   publish: {
     cmd: 'publish <file>',
-    desc: 'Publish a locale note to Evernote.',
+    desc: 'Publish a local note to Evernote.',
     action: publishNote,
     args: {
       '<file>': 'Note file path.',
