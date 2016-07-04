@@ -14,13 +14,13 @@
     "url": "https://github.com/akuma/evermark"
   },
   "bin": {
-    "evermark": "./bin/evermark"
+    "evermark": "bin/evermark"
   },
-  "main": "./src/evermark.js",
+  "main": "src/evermark.js",
   "scripts": {
-    "build": "npm test; babel src -d ./lib",
+    "build": "npm test; babel src -d lib",
     "prepublish": "npm run build",
-    "lint": "eslint ./src/*.js ./src/**/*.js --quiet --fix",
+    "lint": "eslint src/*.js src/**/*.js --quiet --fix",
     "validate": "npm run lint; npm outdated --depth 0",
     "test": "nyc --reporter=lcov --reporter=text ava test/*.js",
     "test:watch": "npm test -- --watch"
