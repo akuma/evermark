@@ -1,15 +1,20 @@
 #!/usr/bin/env node
 /* eslint no-console: 0 */
 /* eslint no-param-reassign: 0 */
-/* eslint import/no-unresolved: 0 */
+/* eslint global-require: 0 */
 
+const DEV = process.env.NODE_ENV === 'development'
+if (DEV) {
+  require('babel-register')
+}
 require('babel-polyfill')
+
 const os = require('os')
 const co = require('co')
 const chalk = require('chalk')
 const program = require('commander')
 const pkg = require('../package.json')
-const { Evermark, config, logger } = require('../lib')
+const { Evermark, config, logger } = require(DEV ? '../src' : '../lib')
 
 const magenta = chalk.magenta
 
