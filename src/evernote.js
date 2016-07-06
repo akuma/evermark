@@ -48,6 +48,17 @@ const ERROR_CODES = {
   [OBJECT_NOT_FOUND]: 'OBJECT_NOT_FOUND',
 }
 
+// Define Evernote default resource type
+export const DEFAULT_RESOURCE_TYPE = 'application/octet-stream'
+
+// Define Evernote resource type mappings
+export const RESOURCE_TYPES = {
+  '.png': 'image/png',
+  '.gif': 'image/gif',
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+}
+
 function wrapError(exception) {
   const error = new Error()
 

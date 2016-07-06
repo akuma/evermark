@@ -1,13 +1,18 @@
 import path from 'path'
+import crypto from 'crypto'
 import Promise from 'bluebird'
 import cheerio from 'cheerio'
 import inlineCss from 'inline-css'
 import hljs from 'highlight.js'
-import Remarkable from 'remarkable'
+import Remarkable, { utils } from 'remarkable'
 import { Evernote } from 'evernote'
-import fileUtils from './fileUtils'
-import EvernoteClient, { OBJECT_NOT_FOUND } from './evernote'
+import EvernoteClient, {
+  OBJECT_NOT_FOUND,
+  DEFAULT_RESOURCE_TYPE,
+  RESOURCE_TYPES,
+} from './evernote'
 import DB from './db'
+import fileUtils from './fileUtils'
 import config, { APP_NAME } from './config'
 
 const debug = require('debug')('evermark')
@@ -42,6 +47,7 @@ const DEFAULT_REMARKABLE_OPTIONS = {
 export default class Evermark {
   constructor(workDir, options) {
     this.workDir = workDir
+    this.images = []
 
     const remarkable = new Remarkable({ ...DEFAULT_REMARKABLE_OPTIONS, ...options })
 
@@ -57,6 +63,31 @@ export default class Evermark {
     remarkable.renderer.rules.fence = (...args) => {
       const result = fenceRule.call(remarkable, ...args)
       return result.replace('<pre>', '<pre class="hljs">')
+    }
+
+    const imageRule = remarkable.renderer.rules.image
+    remarkable.renderer.rules.image = (tokens, idx, ...others) => {
+      const src = utils.escapeHtml(tokens[idx].src)
+
+      // protocol src
+      if (/^.+:\/\//.test(src)) {
+        return imageRule.call(remarkable, tokens, idx, ...others)
+      }
+
+      // Local src
+      this.images.push(src)
+      const imgAttrs = imageRule.call(remarkable, tokens, idx, ...others)
+        .replace(/ src=".*" /, '')
+        .slice(4, -1)
+      const extname = path.extname(src)
+      const imgType = RESOURCE_TYPES[extname] || DEFAULT_RESOURCE_TYPE
+
+      const md5 = crypto.createHash('md5')
+      const image = fileUtils.fs.readFileSync(`notes/${src}`)
+      md5.update(image)
+      const hashHex = md5.digest('hex')
+
+      return `<en-media ${imgAttrs} type="${imgType}" hash="${hashHex}">`
     }
 
     this.remarkable = remarkable
@@ -134,6 +165,8 @@ export default class Evermark {
     note.content = '<?xml version="1.0" encoding="UTF-8"?>' +
       '<!DOCTYPE en-note SYSTEM "http://xml.evernote.com/pub/enml2.dtd">' +
       `<en-note>${htmlContent}</en-note>`
+
+    await this.attchResources(note)
 
     return this.doSaveNote(note)
   }
@@ -287,6 +320,28 @@ export default class Evermark {
     }
 
     return { noteTitle, notebookName, tagNames }
+  }
+
+  async attchResources(note) {
+    const images = this.images.filter(img => !/^.+:\/\//.test(img))
+    debug('note local images:', images)
+    const existImages = await Promise.filter(images,
+      async img => await fileUtils.exists(`notes/${img}`))
+    debug('note local images which exist:', existImages)
+
+    note.resources = await Promise.map(existImages, async img => { // eslint-disable-line
+      const image = await fileUtils.readFile(`notes/${img}`, null)
+
+      const data = new Evernote.Data()
+      data.body = image
+      data.bodyHash = image.toString('base64')
+      data.size = image.length
+
+      const resource = new Evernote.Resource()
+      resource.mime = 'image/jpg'
+      resource.data = data
+      return resource
+    })
   }
 
   async generateHtml(tokens = []) {
