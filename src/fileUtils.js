@@ -11,7 +11,7 @@ const fs = Promise.promisifyAll(fsExtra)
 /**
  * 验证文件或目录是否可访问。
  */
-export function exists(file) {
+function exists(file) {
   return new Promise(resolve => {
     fs.access(file, fs.F_OK, err => resolve(!err))
   })
@@ -20,42 +20,42 @@ export function exists(file) {
 /**
  * 删除指定的文件或目录。
  */
-export function remove(file) {
+function remove(file) {
   return fs.removeAsync(file)
 }
 
 /**
  * 确保指定目录存在，如果目录不存在会自动创建。
  */
-export function ensureDir(dir) {
+function ensureDir(dir) {
   return fs.ensureDirAsync(dir)
 }
 
 /**
  * 确保指定文件存在，如果文件不存在会自动创建。
  */
-export function ensureFile(file) {
+function ensureFile(file) {
   return fs.ensureFileAsync(file)
 }
 
 /**
  * 写数据到指定的文件，如果文件不存在会自动创建。
  */
-export function readFile(file, encoding = 'utf8') {
+function readFile(file, encoding = 'utf8') {
   return fs.readFileAsync(file, encoding)
 }
 
 /**
  * 写数据到指定的文件，如果文件不存在会自动创建。
  */
-export function writeFile(file, data) {
+function writeFile(file, data) {
   return fs.outputFileAsync(file, data)
 }
 
 /**
  * 根据文件名递归查找文件，直至到最顶层目录为止。
  */
-export function searchFile(filename, dir = './') {
+function searchFile(filename, dir = './') {
   const aDir = dir.endsWith('/') ? dir : `${dir}/`
   const currentPath = path.resolve(aDir, filename)
   return exists(currentPath)
@@ -77,7 +77,7 @@ export function searchFile(filename, dir = './') {
  * 获取目录下唯一的文件名，如果同名文件已经存在，则自动添加数字编号。
  * 返回文件名的全路径，例如：/test/foo-1.txt，/test/bar-2.txt。
  */
-export function uniquePath(file) {
+function uniquePath(file) {
   const absolutePath = path.resolve(file)
   const dirname = path.dirname(absolutePath)
   const extname = path.extname(absolutePath)

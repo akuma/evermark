@@ -1,6 +1,6 @@
 import Promise from 'bluebird'
 import Database from 'warehouse'
-import { ensureFile } from './fileUtils'
+import fileUtils from './fileUtils'
 
 const debug = require('debug')('db')
 
@@ -17,7 +17,7 @@ export default class DB {
     }
 
     const path = this.dbPath
-    return ensureFile(path)
+    return fileUtils.ensureFile(path)
       .then(() => {
         this.db = new Database({ path })
         return this.db.load()

@@ -8,7 +8,7 @@ export const APP_NAME = 'Evermark'
 export const APP_DB_NAME = 'evermark.db'
 export const APP_CONFIG_NAME = 'evermark.json'
 
-export function getConfigPath(workDir = './') {
+function getConfigPath(workDir = './') {
   return fileUtils.searchFile(APP_CONFIG_NAME, workDir)
     .then(configPath => {
       debug('configPath: %s', configPath)
@@ -19,7 +19,7 @@ export function getConfigPath(workDir = './') {
     })
 }
 
-export function getDbPath(workDir) {
+function getDbPath(workDir) {
   return getConfigPath(workDir)
     .then(configPath => {
       const dbDir = path.dirname(configPath)
@@ -27,7 +27,7 @@ export function getDbPath(workDir) {
     })
 }
 
-export function readConfig(workDir) {
+function readConfig(workDir) {
   return getConfigPath(workDir)
     .then(configPath => [configPath, fileUtils.readFile(configPath)])
     .spread((configPath, configStr) => {
@@ -52,11 +52,11 @@ export function readConfig(workDir) {
     })
 }
 
-export function getConfig(name, workDir) {
+function getConfig(name, workDir) {
   return readConfig(workDir).then(config => config[name])
 }
 
-export function setConfig(name, value, workDir) {
+function setConfig(name, value, workDir) {
   return readConfig(workDir)
     .then(config => {
       const conf = config
@@ -72,7 +72,7 @@ export function setConfig(name, value, workDir) {
     .spread((configPath, config) => saveConfig(configPath, config))
 }
 
-export function initConfig(destination = '.') {
+function initConfig(destination = '.') {
   const dest = destination.endsWith('/') ? destination : `${destination}/`
   const config = {
     token: 'Your developer token',
