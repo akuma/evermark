@@ -18,10 +18,10 @@
   },
   "main": "src/evermark.js",
   "scripts": {
-    "build": "npm test; babel src -d lib",
+    "build": "npm test && babel src -d lib",
     "prepublish": "npm run build",
     "lint": "eslint src/*.js src/**/*.js --quiet --fix",
-    "validate": "npm run lint; npm outdated --depth 0",
+    "validate": "npm run lint && npm outdated --depth 0",
     "test": "nyc --reporter=lcov --reporter=text ava test/*.js",
     "test:watch": "npm test -- --watch"
   },
@@ -68,7 +68,7 @@
   ],
   "config": {
     "ghooks": {
-      "pre-commit": "npm run lint; npm test",
+      "pre-commit": "npm run lint && npm test",
       "commit-msg": "validate-commit-msg"
     },
     "commitizen": {
