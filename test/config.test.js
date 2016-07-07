@@ -1,13 +1,14 @@
+import path from 'path'
 import test from 'ava'
 import fileUtils from '../src/fileUtils'
 import config from '../src/config'
-import { randomString } from './helpers/utils'
+import utils from './helpers/utils'
 
-const fixturesDir = `${__dirname}/fixtures`
+const fixturesDir = `${__dirname}${path.sep}fixtures`
 
 function getTestDir(root = false) {
-  const rootDir = `${__dirname}/config-test`
-  return root ? rootDir : `${rootDir}/${randomString()}`
+  const rootDir = `${__dirname}${path.sep}config-test`
+  return root ? rootDir : `${rootDir}${path.sep}${utils.randomString()}`
 }
 
 test.before(async () => {
@@ -23,9 +24,9 @@ test('should getConfigPath', async t => {
   await fileUtils.fs.copyAsync(fixturesDir, testDir)
 
   const configPath = await config.getConfigPath(testDir)
-  t.is(configPath, `${testDir}/evermark.json`)
+  t.is(configPath, `${testDir}${path.sep}evermark.json`)
 
-  t.throws(config.getConfigPath('/test'),
+  t.throws(config.getConfigPath(`${path.sep}test`),
     'Please run `evermark init [destination]` to init a new Evermark folder')
 })
 
@@ -34,7 +35,7 @@ test('should getDbPath', async t => {
   await fileUtils.fs.copyAsync(fixturesDir, testDir)
 
   const dbPath = await config.getDbPath(testDir)
-  t.is(dbPath, `${testDir}/evermark.db`)
+  t.is(dbPath, `${testDir}${path.sep}evermark.db`)
 })
 
 test('should readConfig', async t => {
@@ -109,7 +110,7 @@ test('should initConfig', async t => {
   t.false(conf.sandbox)
   t.is(conf.highlight, 'github')
 
-  testDir = `${testDir}/`
+  testDir = `${testDir}${path.sep}`
   await config.initConfig(testDir)
 
   conf = await config.readConfig(testDir)

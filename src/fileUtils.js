@@ -55,8 +55,8 @@ function writeFile(file, data) {
 /**
  * 根据文件名递归查找文件，直至到最顶层目录为止。
  */
-function searchFile(filename, dir = './') {
-  const aDir = dir.endsWith('/') ? dir : `${dir}/`
+function searchFile(filename, dir = `.${path.sep}`) {
+  const aDir = dir.endsWith(path.sep) ? dir : `${dir}${path.sep}`
   const currentPath = path.resolve(aDir, filename)
   return exists(currentPath)
     .then(isExists => {
@@ -64,12 +64,12 @@ function searchFile(filename, dir = './') {
         return currentPath
       }
 
-      const nextPath = path.resolve(`${aDir}../`, filename)
+      const nextPath = path.resolve(`${aDir}..${path.sep}`, filename)
       if (nextPath === currentPath) {
         return null
       }
 
-      return searchFile(filename, `${aDir}../`)
+      return searchFile(filename, `${aDir}..${path.sep}`)
     })
 }
 
@@ -101,7 +101,7 @@ function uniquePath(file) {
           maxSerial = parseInt(maxSerialFilename.replace(filenameRegex, '$1'), 10)
         }
 
-        return `${dirname}/${basename}-${maxSerial + 1}${extname}`
+        return `${dirname}${path.sep}${basename}-${maxSerial + 1}${extname}`
       }
 
       return absolutePath

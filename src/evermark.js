@@ -17,8 +17,9 @@ import config, { APP_NAME } from './config'
 
 const debug = require('debug')('evermark')
 
-const MARKDOWN_THEME_PATH = `${__dirname}/../themes`
-const HIGHLIGHT_THEME_PATH = `${__dirname}/../node_modules/highlight.js/styles`
+const MARKDOWN_THEME_PATH = `${__dirname}${path.sep}..${path.sep}themes`
+const HIGHLIGHT_THEME_PATH = `${__dirname}${path.sep}..${path.sep}node_modules` +
+  `${path.sep}highlight.js${path.sep}styles`
 const DEFAULT_HIGHLIGHT_THEME = 'github'
 const DEFAULT_REMARKABLE_OPTIONS = {
   html: true, // Enable HTML tags in source
@@ -83,7 +84,7 @@ export default class Evermark {
       const imgType = RESOURCE_TYPES[extname] || DEFAULT_RESOURCE_TYPE
 
       const md5 = crypto.createHash('md5')
-      const image = fileUtils.fs.readFileSync(`notes/${src}`)
+      const image = fileUtils.fs.readFileSync(`notes${path.sep}${src}`)
       md5.update(image)
       const hashHex = md5.digest('hex')
 
@@ -100,7 +101,8 @@ export default class Evermark {
     const filename = title.replace(/(\/|-)+/g, '-').replace(/^-|-$/g, '')
 
     // Get unique note path and create note file
-    const notePath = await fileUtils.uniquePath(`${configDir}/notes/${filename}.md`)
+    const notePath = await fileUtils.uniquePath(
+      `${configDir}${path.sep}notes${path.sep}${filename}.md`)
     await fileUtils.writeFile(notePath, `# ${title}\n`)
 
     return notePath
@@ -326,11 +328,11 @@ export default class Evermark {
     const images = this.images.filter(img => !/^.+:\/\//.test(img))
     debug('note local images:', images)
     const existImages = await Promise.filter(images,
-      async img => await fileUtils.exists(`notes/${img}`))
+      async img => await fileUtils.exists(`notes${path.sep}${img}`))
     debug('note local images which exist:', existImages)
 
     note.resources = await Promise.map(existImages, async img => { // eslint-disable-line
-      const image = await fileUtils.readFile(`notes/${img}`, null)
+      const image = await fileUtils.readFile(`notes${path.sep}${img}`, null)
 
       const data = new Evernote.Data()
       data.body = image
@@ -354,8 +356,8 @@ export default class Evermark {
 
     // Html with styles
     const styles = await Promise.all([
-      fileUtils.readFile(`${MARKDOWN_THEME_PATH}/github.css`),
-      fileUtils.readFile(`${HIGHLIGHT_THEME_PATH}/${highlightTheme}.css`),
+      fileUtils.readFile(`${MARKDOWN_THEME_PATH}${path.sep}github.css`),
+      fileUtils.readFile(`${HIGHLIGHT_THEME_PATH}${path.sep}${highlightTheme}.css`),
     ])
     const styleHtml = `<style>${styles[0]}${styles[1]}</style>` +
       `<div class="markdown-body">${markedHtml}</div>`
