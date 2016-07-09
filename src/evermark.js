@@ -1,10 +1,12 @@
+/* eslint no-param-reassign: 0 */
+
 import path from 'path'
 import crypto from 'crypto'
 import Promise from 'bluebird'
 import cheerio from 'cheerio'
 import inlineCss from 'inline-css'
 import hljs from 'highlight.js'
-import Remarkable, { utils } from 'remarkable'
+import Remarkable from 'remarkable'
 import { Evernote } from 'evernote'
 import EvernoteClient, {
   OBJECT_NOT_FOUND,
@@ -23,6 +25,7 @@ const HIGHLIGHT_THEME_PATH = `${__dirname}${path.sep}..${path.sep}node_modules` 
 const DEFAULT_HIGHLIGHT_THEME = 'github'
 const DEFAULT_REMARKABLE_OPTIONS = {
   html: true, // Enable HTML tags in source
+  linkify: true, // Autoconvert URL-like text to links
 
   // Highlighter function. Should return escaped HTML,
   // or '' if the source string is not changed
@@ -48,9 +51,9 @@ const DEFAULT_REMARKABLE_OPTIONS = {
 export default class Evermark {
   constructor(workDir, options) {
     this.workDir = workDir
-    this.images = []
 
     const remarkable = new Remarkable({ ...DEFAULT_REMARKABLE_OPTIONS, ...options })
+    remarkable.inline.ruler.enable(['sub', 'sup'])
 
     // Add inline code class
     const codeRule = remarkable.renderer.rules.code
@@ -64,31 +67,6 @@ export default class Evermark {
     remarkable.renderer.rules.fence = (...args) => {
       const result = fenceRule.call(remarkable, ...args)
       return result.replace('<pre>', '<pre class="hljs">')
-    }
-
-    const imageRule = remarkable.renderer.rules.image
-    remarkable.renderer.rules.image = (tokens, idx, ...others) => {
-      const src = utils.escapeHtml(tokens[idx].src)
-
-      // protocol src
-      if (/^.+:\/\//.test(src)) {
-        return imageRule.call(remarkable, tokens, idx, ...others)
-      }
-
-      // Local src
-      this.images.push(src)
-      const imgAttrs = imageRule.call(remarkable, tokens, idx, ...others)
-        .replace(/ src=".*" /, '')
-        .slice(4, -1)
-      const extname = path.extname(src)
-      const imgType = RESOURCE_TYPES[extname] || DEFAULT_RESOURCE_TYPE
-
-      const md5 = crypto.createHash('md5')
-      const image = fileUtils.fs.readFileSync(`notes${path.sep}${src}`)
-      md5.update(image)
-      const hashHex = md5.digest('hex')
-
-      return `<en-media ${imgAttrs} type="${imgType}" hash="${hashHex}">`
     }
 
     this.remarkable = remarkable
@@ -148,27 +126,26 @@ export default class Evermark {
     note.relativePath = relativePath
 
     const tokens = this.remarkable.parse(content, {})
+
     const noteInfo = this.parseNoteInfo(tokens)
     note.title = noteInfo.noteTitle
+
+    if (noteInfo.tagNames && noteInfo.tagNames.length) {
+      note.tagNames = noteInfo.tagNames
+    }
 
     if (noteInfo.notebookName) {
       const createdNotebook = await this.createNotebookIfPossible(noteInfo.notebookName)
       note.notebookGuid = createdNotebook.guid
     }
 
-    if (noteInfo.tagNames && noteInfo.tagNames.length) {
-      note.tagNames = noteInfo.tagNames
-    }
-
     // The content of an Evernote note is represented using Evernote Markup Language
     // (ENML). The full ENML specification can be found in the Evernote API Overview
     // at http://dev.evernote.com/documentation/cloud/chapters/ENML.php
-    const htmlContent = await this.generateHtml(tokens)
+    const htmlContent = await this.generateHtml(note, tokens)
     note.content = '<?xml version="1.0" encoding="UTF-8"?>' +
       '<!DOCTYPE en-note SYSTEM "http://xml.evernote.com/pub/enml2.dtd">' +
       `<en-note>${htmlContent}</en-note>`
-
-    await this.attchResources(note)
 
     return this.doSaveNote(note)
   }
@@ -182,30 +159,29 @@ export default class Evermark {
     })
 
     let isLocalUpdate = false
-    const aNote = note
-    const dbNote = Note.findOne({ path: aNote.relativePath })
+    const dbNote = Note.findOne({ path: note.relativePath })
     if (dbNote) {
       try {
-        aNote.guid = dbNote.guid
-        const updatedNote = await this.updateNote(aNote)
-        updatedNote.absolutePath = aNote.absolutePath
+        note.guid = dbNote.guid
+        const updatedNote = await this.updateNote(note)
+        updatedNote.absolutePath = note.absolutePath
         return updatedNote
       } catch (e) {
         if (e.code === OBJECT_NOT_FOUND) {
-          delete aNote.guid
+          delete note.guid
           isLocalUpdate = true
         }
       }
     }
 
-    const createdNote = await this.createNote(aNote)
-    createdNote.absolutePath = aNote.absolutePath
+    const createdNote = await this.createNote(note)
+    createdNote.absolutePath = note.absolutePath
 
     if (isLocalUpdate) {
-      await Note.update({ path: aNote.relativePath },
-        { guid: createdNote.guid, path: aNote.relativePath })
+      await Note.update({ path: note.relativePath },
+        { guid: createdNote.guid, path: note.relativePath })
     } else {
-      await Note.insert({ guid: createdNote.guid, path: aNote.relativePath })
+      await Note.insert({ guid: createdNote.guid, path: note.relativePath })
     }
     await db.save()
 
@@ -324,29 +300,7 @@ export default class Evermark {
     return { noteTitle, notebookName, tagNames }
   }
 
-  async attchResources(note) {
-    const images = this.images.filter(img => !/^.+:\/\//.test(img))
-    debug('note local images:', images)
-    const existImages = await Promise.filter(images,
-      async img => await fileUtils.exists(`notes${path.sep}${img}`))
-    debug('note local images which exist:', existImages)
-
-    note.resources = await Promise.map(existImages, async img => { // eslint-disable-line
-      const image = await fileUtils.readFile(`notes${path.sep}${img}`, null)
-
-      const data = new Evernote.Data()
-      data.body = image
-      data.bodyHash = image.toString('base64')
-      data.size = image.length
-
-      const resource = new Evernote.Resource()
-      resource.mime = 'image/jpg'
-      resource.data = data
-      return resource
-    })
-  }
-
-  async generateHtml(tokens = []) {
+  async generateHtml(note, tokens) {
     const markedHtml = this.remarkable.renderer.render(tokens, this.remarkable.options)
     debug('markedHtml: %s', markedHtml)
 
@@ -370,9 +324,42 @@ export default class Evermark {
       removeHtmlSelectors: true,
     })
 
+    // Attch resources to note
+    const $ = cheerio.load(inlineStyleHtml)
+    await this.attchResources(note, $)
+
     // ENML is a superset of XHTML, so change html to xhtml
-    const inlineStyleXhtml = cheerio.load(inlineStyleHtml).xml()
+    const inlineStyleXhtml = $.xml()
     debug('inlineStyleXhtml: %s', inlineStyleXhtml)
     return inlineStyleXhtml
+  }
+
+  async attchResources(note, $) {
+    const configDir = await this.getConfigDir()
+
+    const imgs = $('img').toArray().filter(img => !/^.+:\/\//.test(img.attribs.src))
+    note.resources = await Promise.map(imgs, async img => {
+      const src = img.attribs.src
+      delete img.attribs.src
+      img.name = 'en-media'
+
+      const extname = path.extname(src)
+      const imgType = RESOURCE_TYPES[extname] || DEFAULT_RESOURCE_TYPE
+      img.attribs.type = imgType // eslint-disable-line
+
+      const image = await fileUtils.readFile(`${configDir}${path.sep}notes${path.sep}${src}`, null)
+
+      const md5 = crypto.createHash('md5')
+      md5.update(image)
+      img.attribs.hash = md5.digest('hex')
+
+      const resource = new Evernote.Resource()
+      resource.mime = 'image/jpg'
+      resource.data = new Evernote.Data()
+      resource.data.body = image
+      resource.data.bodyHash = image.toString('base64')
+      resource.data.size = image.length
+      return resource
+    })
   }
 }

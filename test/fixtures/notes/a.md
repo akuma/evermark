@@ -1,30 +1,75 @@
-# test a
+# Markdown Syntax
 
-> Hello world!
+## Emphasis
 
-This is a `test` title.
+*This text will be italic*
+_This will also be italic_
 
-## title 1
+**This text will be bold**
+__This will also be bold__
+
+~~This text will be crossed~~
+
+_You **can** combine ~~them~~_
+
+## Lists
+
+### Unordered
+
+- Item 1
+- Item 2
+  - Item 2a
+  - Item 2b
+
+### Ordered
+
+1. Item 1
+1. Item 2
+1. Item 3
+  - Item 3a
+  - Item 3b
+
+## Images
+
+![Image of test](img/test.png "test image")
+
+## Links
+
+http://github.com - automatic!
+[GitHub](http://github.com)
+
+## Blockquotes
+
+As Kanye West said:
+
+> We're living the future so
+> the present is our past.
+
+## Inline code
+
+This is an inline code: `var example = true`
+
+## Block code
 
 ```
-Hello Markdown!
+console.log('Hello world!')
 ```
 
 ```js
 console.log('Hello world!')
 ```
 
-### title 2
+## Tables
 
-- one
-- two
-- three
+First Header | Second Header
+------------ | -------------
+Content from cell 1 | Content from cell 2
+Content in the first column | Content in the second column
 
-1. one
-1. two
-1. three
+## Sup & Sub
 
+19^th^ H~2~O
 
-### title 3
+## HTML
 
-<div>This is a html code.</div>
+<div style="color: red;">This is a <strong>html</strong> code.</div>
