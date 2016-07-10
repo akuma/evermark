@@ -1,6 +1,6 @@
 {
   "name": "evermark",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "description": "A command line tool for syncing markdown files to Evernote.",
   "keywords": [
     "command",
