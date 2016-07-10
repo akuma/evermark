@@ -46,9 +46,27 @@ test('should readConfig', async t => {
   t.is(conf.token, 'foo')
   t.false(conf.china)
   t.true(conf.sandbox)
+})
 
+test('should readConfig error when config file invalid', async t => {
   t.throws(config.readConfig(),
     'Please run `evermark init [destination]` to init a new Evermark folder')
+
+  const testDir = getTestDir()
+  const configPath = `${testDir}/evermark.json`
+  await fileUtils.fs.copyAsync(fixturesDir, testDir)
+
+  await fileUtils.writeFile(configPath, 'token')
+  await t.throws(config.readConfig(testDir),
+    `Please write to ${configPath}:\n\n` +
+    `{\n  "token": "xxx",\n  "china": xxx\n}`)
+
+  await fileUtils.writeFile(configPath, '{ "china": true }')
+  t.throws(config.readConfig(testDir),
+    `Please write developer token to ${configPath}\n\n` +
+    'To get a developer token, please visit:\n  ' +
+    'https://www.evernote.com/api/DeveloperToken.action or ' +
+    'https://app.yinxiang.com/api/DeveloperToken.action')
 })
 
 test('should getConfig', async t => {
