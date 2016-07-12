@@ -38,8 +38,10 @@
     "fs-extra": "^0.30.0",
     "highlight.js": "^9.5.0",
     "inline-css": "^2.2.2",
+    "markdown-it": "^7.0.0",
+    "markdown-it-sub": "^1.0.0",
+    "markdown-it-sup": "^1.0.0",
     "ora": "^0.2.3",
-    "remarkable": "^1.6.2",
     "warehouse": "^2.2.0"
   },
   "devDependencies": {

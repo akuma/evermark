@@ -6,7 +6,9 @@ import Promise from 'bluebird'
 import cheerio from 'cheerio'
 import inlineCss from 'inline-css'
 import hljs from 'highlight.js'
-import Remarkable from 'remarkable'
+import Markdown from 'markdown-it'
+import mdSub from 'markdown-it-sub'
+import mdSup from 'markdown-it-sup'
 import { Evernote } from 'evernote'
 import EvernoteClient, {
   OBJECT_NOT_FOUND,
@@ -23,53 +25,43 @@ const MARKDOWN_THEME_PATH = `${__dirname}${path.sep}..${path.sep}themes`
 const HIGHLIGHT_THEME_PATH = `${__dirname}${path.sep}..${path.sep}node_modules` +
   `${path.sep}highlight.js${path.sep}styles`
 const DEFAULT_HIGHLIGHT_THEME = 'github'
-const DEFAULT_REMARKABLE_OPTIONS = {
-  html: true, // Enable HTML tags in source
-  linkify: true, // Autoconvert URL-like text to links
-
-  // Highlighter function. Should return escaped HTML,
-  // or '' if the source string is not changed
-  highlight: (code, lang) => {
-    if (lang && hljs.getLanguage(lang)) {
-      try {
-        return hljs.highlight(lang, code).value
-      } catch (e) {
-        // Ignore
-      }
-    }
-
-    try {
-      return hljs.highlightAuto(code).value
-    } catch (e) {
-      // Ignore
-    }
-
-    return ''
-  },
-}
 
 export default class Evermark {
   constructor(workDir, options) {
     this.workDir = workDir
 
-    const remarkable = new Remarkable({ ...DEFAULT_REMARKABLE_OPTIONS, ...options })
-    remarkable.inline.ruler.enable(['sub', 'sup'])
+    const md = new Markdown({
+      html: true, // Enable HTML tags in source
+      linkify: true, // Autoconvert URL-like text to links
+
+      // Highlighter function. Should return escaped HTML,
+      // or '' if the source string is not changed
+      highlight(code, lang) {
+        if (code.match(/^graph/) || code.match(/^sequenceDiagram/) || code.match(/^gantt/)) {
+          return `<div class="mermaid">${code}</div>`
+        }
+
+        if (lang && hljs.getLanguage(lang)) {
+          try {
+            return `<pre class="hljs"><code>${hljs.highlight(lang, code, true).value}</code></pre>`
+          } catch (e) {
+            // ignore
+          }
+        }
+
+        return `<pre class="hljs"><code>${md.utils.escapeHtml(code)}</code></pre>`
+      },
+      ...options,
+    }).use(mdSub).use(mdSup)
 
     // Add inline code class
-    const codeRule = remarkable.renderer.rules.code
-    remarkable.renderer.rules.code = (...args) => {
-      const result = codeRule.call(remarkable, ...args)
+    const inlineCodeRule = md.renderer.rules.code_inline
+    md.renderer.rules.code_inline = (...args) => {
+      const result = inlineCodeRule.call(md, ...args)
       return result.replace('<code>', '<code class="inline">')
     }
 
-    // Add block code class
-    const fenceRule = remarkable.renderer.rules.fence
-    remarkable.renderer.rules.fence = (...args) => {
-      const result = fenceRule.call(remarkable, ...args)
-      return result.replace('<pre>', '<pre class="hljs">')
-    }
-
-    this.remarkable = remarkable
+    this.md = md
   }
 
   async createLocalNote(title) {
@@ -125,7 +117,7 @@ export default class Evermark {
     note.absolutePath = absolutePath
     note.relativePath = relativePath
 
-    const tokens = this.remarkable.parse(content, {})
+    const tokens = this.md.parse(content, {})
 
     const noteInfo = this.parseNoteInfo(tokens)
     note.title = noteInfo.noteTitle
@@ -301,7 +293,7 @@ export default class Evermark {
   }
 
   async generateHtml(note, tokens) {
-    const markedHtml = this.remarkable.renderer.render(tokens, this.remarkable.options)
+    const markedHtml = this.md.renderer.render(tokens, this.md.options)
     debug('markedHtml: %s', markedHtml)
 
     // Get highlight theme from configuration
@@ -339,7 +331,7 @@ export default class Evermark {
 
     const imgs = $('img').toArray().filter(img => !/^.+:\/\//.test(img.attribs.src))
     note.resources = await Promise.map(imgs, async img => {
-      const src = img.attribs.src
+      const src = decodeURI(img.attribs.src)
       delete img.attribs.src
       img.name = 'en-media'
 
