@@ -118,6 +118,15 @@ test('should setConfig', async t => {
   t.is(conf.hi, undefined)
 })
 
+test('should setConfig error when json stringify error', async t => {
+  const testDir = getTestDir()
+  await fileUtils.fs.copyAsync(fixturesDir, testDir)
+
+  t.throws(config.setConfig('token', {
+    get foo() { throw new Error('Mock stringify error') },
+  }, testDir), 'Mock stringify error')
+})
+
 test('should initConfig', async t => {
   let testDir = getTestDir()
   await config.initConfig(testDir)
