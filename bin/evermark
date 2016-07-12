@@ -14,7 +14,7 @@ const co = require('co')
 const chalk = require('chalk')
 const program = require('commander')
 const pkg = require('../package.json')
-const { Evermark, config, logger } = require(DEV ? '../src' : '../lib')
+const { Evermark, config } = require(DEV ? '../src' : '../lib')
 
 const magenta = chalk.magenta
 
@@ -101,6 +101,14 @@ function tildify(str) {
   return magenta((str.indexOf(home) === 0 ? str.replace(home, '~') : str))
 }
 
+function info(message) {
+  console.log(`${chalk.green('INFO')} `, message)
+}
+
+function error(message) {
+  console.log(`${chalk.red('ERROR')} `, message)
+}
+
 function commandHelp(cmd) {
   const command = commands[cmd]
   if (command) {
@@ -133,50 +141,50 @@ function printCommandHelp(command, desc, args) {
 function init(destination) {
   co(function* fn() {
     yield config.initConfig(destination)
-    logger.info('Evermark folder has been initialized.\n      ' +
+    info('Evermark folder has been initialized.\n      ' +
       'Update the token in "evermark.json" then you can add some notes.')
-  }).catch(e => logger.error(e.message))
+  }).catch(e => error(e.message))
 }
 
 function getOrSetConfig(name, value) {
   co(function* fn() {
     if (!name) {
       const conf = yield config.readConfig()
-      logger.info(conf)
+      info(conf)
       return
     }
 
     if (!value) {
       const val = yield config.getConfig(name)
-      logger.info(`${name}: ${val}`)
+      info(`${name}: ${val}`)
       return
     }
 
     const conf = yield config.setConfig(name, value)
-    logger.info(`Updated config:\n\n${conf}`)
-  }).catch(e => logger.error(e.message))
+    info(`Updated config:\n\n${conf}`)
+  }).catch(e => error(e.message))
 }
 
 function newNote(title) {
   co(function* fn() {
     const evermark = new Evermark()
     const notePath = yield evermark.createLocalNote(title)
-    logger.info(`Created local note: ${tildify(notePath)}`)
-  }).catch(e => logger.error(e.message))
+    info(`Created local note: ${tildify(notePath)}`)
+  }).catch(e => error(e.message))
 }
 
 function publishNote(file) {
   co(function* fn() {
     const evermark = new Evermark()
     const note = yield evermark.publishNote(file)
-    logger.info(`Published note: ${tildify(note.absolutePath)}`)
-  }).catch(e => logger.error(e.message))
+    info(`Published note: ${tildify(note.absolutePath)}`)
+  }).catch(e => error(e.message))
 }
 
 function unpublish(file) {
   co(function* fn() {
     const evermark = new Evermark()
     const notePath = yield evermark.unpublishNote(file)
-    logger.info(`Unpublished note: ${tildify(notePath)}`)
-  }).catch(e => logger.error(e.message))
+    info(`Unpublished note: ${tildify(notePath)}`)
+  }).catch(e => error(e.message))
 }
