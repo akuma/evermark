@@ -1,31 +1,38 @@
 {
   "name": "evermark",
   "version": "0.5.0",
-  "description": "A command line tool for syncing markdown files to Evernote.",
-  "keywords": [
-    "command",
-    "evernote",
-    "markdown"
-  ],
-  "author": "Weijia Huang <ihuangwj@gmail.com>",
+  "description": "A command line tool for syncing markdown files to Evernote :elephant:",
   "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/akuma/evermark"
-  },
+  "repository": "akuma/evermark",
+  "author": "Weijia Huang <ihuangwj@gmail.com>",
   "bin": {
-    "evermark": "bin/evermark"
+    "evermark": "bin/cli.js"
   },
-  "main": "src/evermark.js",
+  "engines": {
+    "node": ">=4.0"
+  },
   "scripts": {
     "clean": "rimraf build",
     "build": "npm run clean && babel src -d lib",
     "prepublish": "npm run build",
     "lint": "eslint src/*.js src/**/*.js --quiet --fix",
     "validate": "npm run lint && npm outdated --depth 0",
-    "test": "nyc --reporter=lcov --reporter=text ava test/*.js",
-    "test:watch": "npm test -- --watch"
+    "test": "nyc ava test/*.js",
+    "test:watch": "npm test -- --watch",
+    "coveralls": "nyc report --reporter=text-lcov | coveralls"
   },
+  "files": [
+    "bin",
+    "lib",
+    "themes"
+  ],
+  "keywords": [
+    "cli",
+    "command",
+    "enml",
+    "evernote",
+    "markdown"
+  ],
   "dependencies": {
     "babel-polyfill": "^6.9.1",
     "bluebird": "^3.4.1",
@@ -46,7 +53,7 @@
     "warehouse": "^2.2.0"
   },
   "devDependencies": {
-    "ava": "^0.15.2",
+    "ava": "*",
     "babel-cli": "^6.10.1",
     "babel-eslint": "^6.1.2",
     "babel-preset-es2015": "^6.9.0",
@@ -63,13 +70,6 @@
     "sinon": "^1.17.4",
     "validate-commit-message": "^3.0.1"
   },
-  "files": [
-    "bin",
-    "lib",
-    "themes",
-    "LICENSE",
-    "README.md"
-  ],
   "config": {
     "ghooks": {
       "pre-commit": "npm run lint && npm test",
@@ -94,15 +94,12 @@
       ]
     }
   },
-  "engines": {
-    "node": ">=4.0"
-  },
   "ava": {
+    "babel": "inherit",
     "failFast": true,
     "require": [
       "babel-register",
       "babel-polyfill"
-    ],
-    "babel": "inherit"
+    ]
   }
 }
