@@ -126,4 +126,4 @@ Markdown | Less | Pretty
 
 ## License
 
-MIT
+[MIT](LICENSE)
