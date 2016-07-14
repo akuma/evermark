@@ -8,6 +8,7 @@ import inlineCss from 'inline-css'
 import hljs from 'highlight.js'
 import MarkdownIt from 'markdown-it'
 import mdEmoji from 'markdown-it-emoji'
+import mdEnTodo from 'markdown-it-enml-todo'
 import mdSub from 'markdown-it-sub'
 import mdSup from 'markdown-it-sup'
 import { Evernote } from 'evernote'
@@ -59,6 +60,7 @@ export default class Evermark {
 
     // Use some plugins
     md.use(mdEmoji)
+      .use(mdEnTodo)
       .use(mdSub)
       .use(mdSup)
 
@@ -324,8 +326,8 @@ export default class Evermark {
       removeHtmlSelectors: true,
     })
 
-    // Attch resources to note
     const $ = cheerio.load(inlineStyleHtml)
+    $('en-todo').removeAttr('style')
     await this.attchResources(note, $)
 
     // ENML is a superset of XHTML, so change html to xhtml

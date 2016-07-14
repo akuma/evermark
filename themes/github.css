@@ -682,7 +682,8 @@
   margin-top: 3px;
 }
 
-.markdown-body .task-list-item input {
+/* Hack for en-todo element */
+.markdown-body .task-list-item /*input*/ {
   margin: 0 0.2em 0.25em -1.6em;
   vertical-align: middle;
 }
