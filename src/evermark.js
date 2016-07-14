@@ -6,7 +6,8 @@ import Promise from 'bluebird'
 import cheerio from 'cheerio'
 import inlineCss from 'inline-css'
 import hljs from 'highlight.js'
-import Markdown from 'markdown-it'
+import MarkdownIt from 'markdown-it'
+import mdEmoji from 'markdown-it-emoji'
 import mdSub from 'markdown-it-sub'
 import mdSup from 'markdown-it-sup'
 import { Evernote } from 'evernote'
@@ -24,13 +25,14 @@ const debug = require('debug')('evermark')
 const MARKDOWN_THEME_PATH = `${__dirname}${path.sep}..${path.sep}themes`
 const HIGHLIGHT_THEME_PATH = `${__dirname}${path.sep}..${path.sep}node_modules` +
   `${path.sep}highlight.js${path.sep}styles`
+
 const DEFAULT_HIGHLIGHT_THEME = 'github'
 
 export default class Evermark {
   constructor(workDir, options) {
     this.workDir = workDir
 
-    const md = new Markdown({
+    const md = new MarkdownIt({
       html: true, // Enable HTML tags in source
       linkify: true, // Autoconvert URL-like text to links
 
@@ -52,7 +54,12 @@ export default class Evermark {
         return `<pre class="hljs"><code>${md.utils.escapeHtml(code)}</code></pre>`
       },
       ...options,
-    }).use(mdSub).use(mdSup)
+    })
+
+    // Use some plugins
+    md.use(mdEmoji)
+      .use(mdSub)
+      .use(mdSup)
 
     // Add inline code class
     const inlineCodeRule = md.renderer.rules.code_inline

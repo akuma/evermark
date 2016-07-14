@@ -12,6 +12,14 @@ __This will also be bold__
 
 _You **can** combine ~~them~~_
 
+## Sups & Subs
+
+19^th^ H~2~O
+
+## Emojis
+
+:smile: :smiling_imp: :heart: :sunny: :watermelon: :cn:
+
 ## Lists
 
 ### Unordered
@@ -45,6 +53,13 @@ As Kanye West said:
 > We're living the future so
 > the present is our past.
 
+## Tables
+
+First Header | Second Header
+------------ | -------------
+Content from cell 1 | Content from cell 2
+Content in the first column | Content in the second column
+
 ## Inline code
 
 This is an inline code: `var example = true`
@@ -58,17 +73,6 @@ console.log('Hello world!')
 ```js
 console.log('Hello world!')
 ```
-
-## Tables
-
-First Header | Second Header
------------- | -------------
-Content from cell 1 | Content from cell 2
-Content in the first column | Content in the second column
-
-## Sup & Sub
-
-19^th^ H~2~O
 
 ## HTML
 
