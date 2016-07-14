@@ -19,6 +19,7 @@ import EvernoteClient, {
 import DB from './db'
 import fileUtils from './fileUtils'
 import config, { APP_NAME } from './config'
+import EvermarkError from './EvermarkError'
 
 const debug = require('debug')('evermark')
 
@@ -102,7 +103,7 @@ export default class Evermark {
     const note = Note.findOne({ path: relativePath })
 
     if (!note) {
-      throw new Error(`${notePath} is not a published note`)
+      throw new EvermarkError(`${notePath} is not a published note`)
     }
 
     await this.expungeNote(note.guid)

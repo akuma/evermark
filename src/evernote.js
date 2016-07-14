@@ -1,5 +1,6 @@
 import Promise from 'bluebird'
 import { Evernote } from 'evernote'
+import EvermarkError from './EvermarkError'
 
 const debug = require('debug')('evernote')
 
@@ -60,7 +61,7 @@ export const RESOURCE_TYPES = {
 }
 
 function wrapError(exception) {
-  const error = new Error()
+  const error = new EvermarkError()
 
   error.code = exception.errorCode || UNKNOWN_ERROR
   if (exception.identifier) {
@@ -87,7 +88,7 @@ function wrapError(exception) {
 export default class EvernoteClient {
   constructor({ token, china = true, sandbox = false } = { china: true, sandbox: false }) {
     if (!token) {
-      throw new Error('Missing developer token')
+      throw new EvermarkError('Missing developer token')
     }
 
     let serviceHost = china ? 'app.yinxiang.com' : 'www.evernote.com'

@@ -1,6 +1,7 @@
 import path from 'path'
 import Promise from 'bluebird'
 import fileUtils from './fileUtils'
+import EvermarkError from './EvermarkError'
 
 const debug = require('debug')('config')
 
@@ -13,7 +14,8 @@ function getConfigPath(workDir = `.${path.sep}`) {
     .then(configPath => {
       debug('configPath: %s', configPath)
       if (!configPath) {
-        throw new Error('Please run `evermark init [destination]` to init a new Evermark folder')
+        throw new EvermarkError(
+          'Please run `evermark init [destination]` to init a new Evermark folder')
       }
       return configPath
     })
@@ -35,13 +37,13 @@ function readConfig(workDir) {
       try {
         config = JSON.parse(configStr)
       } catch (e) {
-        throw new Error(
+        throw new EvermarkError(
           `Please write to ${configPath}:\n\n` +
           `{\n  "token": "xxx",\n  "china": xxx\n}`, e)
       }
 
       if (!config.token) {
-        throw new Error(`Please write developer token to ${configPath}\n\n` +
+        throw new EvermarkError(`Please write developer token to ${configPath}\n\n` +
           'To get a developer token, please visit:\n  ' +
           'https://www.evernote.com/api/DeveloperToken.action or ' +
           'https://app.yinxiang.com/api/DeveloperToken.action')

@@ -72,7 +72,10 @@ const commands = {
   help: {
     cmd: 'help [command]',
     desc: 'Get help on a command.',
-    action: commandHelp,
+    action: showProgramHelp,
+    args: {
+      '[command]': 'Command name.',
+    },
   },
 }
 
@@ -107,16 +110,7 @@ function info(message) {
 }
 
 function error(message) {
-  console.log(`${chalk.red('ERROR')} `, message)
-}
-
-function commandHelp(cmd) {
-  const command = commands[cmd]
-  if (command) {
-    printCommandHelp(cmd, command.desc, command.args)
-  } else {
-    program.help()
-  }
+  console.error(`${chalk.red('ERROR')} `, message)
 }
 
 function printCommandHelp(command, desc, args) {
@@ -139,16 +133,49 @@ function printCommandHelp(command, desc, args) {
   console.log()
 }
 
+function showProgramHelp(cmd) {
+  const command = commands[cmd]
+  if (command) {
+    printCommandHelp(cmd, command.desc, command.args)
+  } else {
+    program.help()
+  }
+}
+
+function exeCmd(fn, spinnerEnable = false) {
+  const spinner = spinnerEnable ? ora().start() : null
+
+  co(function* exe() {
+    yield fn(spinner)
+
+    if (spinner) {
+      spinner.stop()
+    }
+  }).catch(err => {
+    if (spinner) {
+      spinner.stop()
+    }
+
+    if (err.name === 'EvermarkError') {
+      error(err.message)
+    } else {
+      error(err)
+    }
+
+    process.exit(1)
+  })
+}
+
 function init(destination) {
-  co(function* fn() {
+  exeCmd(function* fn() {
     yield config.initConfig(destination)
     info('Evermark folder has been initialized.\n      ' +
-      'Update the token in "evermark.json" then you can add some notes.')
-  }).catch(e => error(e.message))
+        'Update the token in "evermark.json" then you can add some notes.')
+  })
 }
 
 function getOrSetConfig(name, value) {
-  co(function* fn() {
+  exeCmd(function* fn() {
     if (!name) {
       const conf = yield config.readConfig()
       info(conf)
@@ -163,43 +190,29 @@ function getOrSetConfig(name, value) {
 
     const conf = yield config.setConfig(name, value)
     info(`Updated config:\n\n${conf}`)
-  }).catch(e => error(e.message))
+  })
 }
 
 function newNote(title) {
-  co(function* fn() {
+  exeCmd(function* fn() {
     const evermark = new Evermark()
     const notePath = yield evermark.createLocalNote(title)
     info(`Created local note: ${tildify(notePath)}`)
-  }).catch(e => error(e.message))
+  })
 }
 
 function publishNote(file) {
-  const spinner = ora('Publishing note').start()
-
-  co(function* fn() {
+  exeCmd(function* fn() {
     const evermark = new Evermark()
     const note = yield evermark.publishNote(file)
-
-    spinner.stop()
     info(`Published note: ${tildify(note.absolutePath)}`)
-  }).catch(e => {
-    spinner.stop()
-    error(e.message)
-  })
+  }, true)
 }
 
 function unpublish(file) {
-  const spinner = ora('Unpublishing note').start()
-
-  co(function* fn() {
+  exeCmd(function* fn() {
     const evermark = new Evermark()
     const notePath = yield evermark.unpublishNote(file)
-
-    spinner.stop()
     info(`Unpublished note: ${tildify(notePath)}`)
-  }).catch(e => {
-    spinner.stop()
-    error(e.message)
-  })
+  }, true)
 }
