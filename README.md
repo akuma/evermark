@@ -22,7 +22,7 @@
 **Evermark** 是一款基于 Evernote 的 Markdown 笔记命令行工具，简单实用。
 
 - 支持基于命令行添加、发布笔记，同时会自动添加在笔记内容中指定的笔记本和标签。
-- 支持转换 Markdown 格式的笔记，支持高亮代码块、引用网络图片、本地图片。
+- 支持转换 Markdown 格式的笔记，支持高亮代码块、引用网络图片、本地图片、任务列表等。
 
 -------------------
 
@@ -83,46 +83,122 @@ evermark unpublish <file>
 evermark help [command]
 ```
 
-## Markdown 简介
+## Evermark 支持的 Markdown 语法
 
-> Markdown 是一种轻量级标记语言，它允许人们使用易读易写的纯文本格式编写文档，然后转换成格式丰富的HTML页面。  —— [维基百科](https://zh.wikipedia.org/wiki/Markdown)
+> Markdown 是一种轻量级标记语言，它允许人们使用易读易写的纯文本格式编写文档，然后转换成格式丰富的 HTML 页面。  —— [维基百科](https://zh.wikipedia.org/wiki/Markdown)
 
-正如您在阅读的这份文档，它使用简单的符号标识不同的标题，将某些文字标记为 **粗体** 或者 *斜体*，创建一个[链接](http://www.example.com)。下面是几个 **Evermark** 支持的高级功能。
+以下是部分 **Evermark** 支持的语法。
 
-### 代码块
-
-```javascript
-var s = "JavaScript syntax highlighting";
-alert(s);
-```
-
-```python
-s = "Python syntax highlighting"
-print s
-```
+### Emphasis
 
 ```
-No language indicated, so no syntax highlighting.
-But let's throw in a <b>tag</b>.
+*This text will be italic*
+_This will also be italic_
+
+**This text will be bold**
+__This will also be bold__
+
+~~This text will be crossed~~
+
+_You **can** combine ~~them~~_
 ```
 
-### 表格
+### Sups & Subs
 
-| Tables        | Are           | Cool  |
-| ------------- |:-------------:| -----:|
-| col 3 is      | right-aligned | $1600 |
-| col 2 is      | centered      |   $12 |
-| zebra stripes | are neat      |    $1 |
+```
+19^th^ H~2~O
+```
 
-Markdown | Less | Pretty
---- | --- | ---
-*Still* | `renders` | **nicely**
-1 | 2 | 3
+### Emojis
 
-## Evernote 相关
+```
+:smile: :heart: :sunny: :watermelon: :cn:
+```
 
+### Links
+
+```
+http://github.com - automatic!
+[GitHub](http://github.com)
+```
+
+### Blockquotes
+
+```
+As Kanye West said:
+
+> We're living the future so
+> the present is our past.
+```
+
+### Lists
+
+#### Unordered
+
+```
+- Item 1
+- Item 2
+  - Item 2a
+  - Item 2b
+```
+
+#### Ordered
+
+```
+1. Item 1
+1. Item 2
+1. Item 3
+   - Item 3a
+   - Item 3b
+```
+
+### Task lists
+
+```
+- [x] Write blog post with :heart:
+- [x] Create sample **gist**
+- [ ] Take screenshots for blog post
+```
+
+### Tables
+
+```
+First Header | Second Header
+------------ | -------------
+Content from cell 1 | Content from cell 2
+Content in the first column | Content in the second column
+```
+
+### Images
+
+```
+![Image of test](img/test.png "test image")
+```
+
+### Inline code
+
+```
+This is an inline code: `var example = true`
+```
+
+### Block code
+
+````
+```js
+console.log('Hello world!')
+```
+````
+
+### HTML
+
+```
+<div style="color: red;">This is a <strong>html</strong> code.</div>
+```
+
+### Notebooks & Tags
+
+- **Evermark** 自动使用文档内出现的第一个标题作为笔记标题。
 - **Evermark** 支持 `@(笔记本)[标签 A|标签 B]` 语法, 以选择笔记本和添加标签。
-- **Evermark** 自动使用文档内出现的第一个标题作为笔记标题。例如本文，就是第一行的 `Evermark`。
 
 ## License
 
