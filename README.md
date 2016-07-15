@@ -85,9 +85,16 @@ evermark help [command]
 
 ## Evermark 支持的 Markdown 语法
 
-> Markdown 是一种轻量级标记语言，它允许人们使用易读易写的纯文本格式编写文档，然后转换成格式丰富的 HTML 页面。  —— [维基百科](https://zh.wikipedia.org/wiki/Markdown)
+### Headers
 
-以下是部分 **Evermark** 支持的语法。
+```
+# H1
+## H2
+### H3
+#### H4
+##### H5
+###### H6
+```
 
 ### Emphasis
 
@@ -106,10 +113,11 @@ _You **can** combine ~~them~~_
 ### Sups & Subs
 
 ```
-19^th^ H~2~O
+19^th^
+H~2~O
 ```
 
-### Emojis
+### Emoji
 
 ```
 :smile: :heart: :sunny: :watermelon: :cn:
@@ -152,7 +160,7 @@ As Kanye West said:
    - Item 3b
 ```
 
-### Task lists
+### Task Lists
 
 ```
 - [x] Write blog post with :heart:
@@ -172,24 +180,23 @@ Content in the first column | Content in the second column
 ### Images
 
 ```
-![Image of test](img/test.png "test image")
+![Image of Test](img/test.png "Image of Test")
+![GitHub Logo](https://assets-cdn.github.com/images/modules/logos_page/Octocat.png "GitHub Logo")
 ```
 
-### Inline code
+### Inline Code
 
 ```
 This is an inline code: `var example = true`
 ```
 
-### Block code
+### Block Code
 
-````
-```js
-console.log('Hello world!')
-```
-````
+    ```js
+    console.log('Hello world!')
+    ```
 
-### HTML
+### Raw HTML
 
 ```
 <div style="color: red;">This is a <strong>html</strong> code.</div>
