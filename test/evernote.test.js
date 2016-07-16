@@ -2,7 +2,7 @@ import test from 'ava'
 import sinon from 'sinon'
 import Promise from 'bluebird'
 import { Evernote } from 'evernote'
-import EvernoteClient, { BAD_DATA_FORMAT, INVALID_AUTH } from '../src/evernote'
+import EvernoteClient, { BAD_DATA_FORMAT, INVALID_AUTH } from '../src/EvernoteClient'
 
 const token = 'test'
 

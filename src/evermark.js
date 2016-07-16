@@ -16,7 +16,7 @@ import EvernoteClient, {
   OBJECT_NOT_FOUND,
   DEFAULT_RESOURCE_TYPE,
   RESOURCE_TYPES,
-} from './evernote'
+} from './EvernoteClient'
 import DB from './db'
 import fileUtils from './fileUtils'
 import config, { APP_NAME } from './config'
