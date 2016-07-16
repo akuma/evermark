@@ -53,7 +53,7 @@ test('should readConfig error when config file invalid', async t => {
     'Please run `evermark init [destination]` to init a new Evermark folder')
 
   const testDir = getTestDir()
-  const configPath = `${testDir}/evermark.json`
+  const configPath = `${testDir}${path.sep}evermark.json`
   await fileUtils.fs.copyAsync(fixturesDir, testDir)
 
   await fileUtils.writeFile(configPath, 'token')
