@@ -120,12 +120,12 @@ export default class Evermark {
     const noteAttrs = new Evernote.NoteAttributes()
     noteAttrs.source = APP_NAME
     noteAttrs.sourceApplication = APP_NAME
-    noteAttrs.contentClass = APP_NAME // Make the note read-only
+    noteAttrs.contentClass = APP_NAME // make the note read-only
     note.attributes = noteAttrs
 
     const { absolutePath, relativePath } = await this.getNotePathInfo(notePath)
     note.absolutePath = absolutePath
-    note.relativePath = relativePath
+    note.relativePath = relativePath.replace('\\', '/') // fix windows issue
 
     const tokens = this.md.parse(content, {})
 
