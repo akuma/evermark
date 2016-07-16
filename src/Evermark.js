@@ -102,7 +102,7 @@ export default class Evermark {
     })
 
     const { absolutePath, relativePath } = await this.getNotePathInfo(notePath)
-    const note = Note.findOne({ path: relativePath })
+    const note = Note.findOne({ path: relativePath.replace('\\', '/') }) // fix windows issue
 
     if (!note) {
       throw new EvermarkError(`${notePath} is not a published note`)
