@@ -2,6 +2,7 @@
 
 [![NPM version][npm-image]][npm-url]
 [![Build Status][build-image]][build-url]
+[![Windows Build Status][build-image-win]][build-url-win]
 [![Coverage Status][coverage-image]][coverage-url]
 [![Dependency Status][david-image]][david-url]
 [![Dependency Status][david-dev-image]][david-dev-url]
@@ -10,6 +11,8 @@
 [npm-url]: https://npmjs.org/package/evermark
 [build-image]: https://travis-ci.org/akuma/evermark.svg?branch=master
 [build-url]: https://travis-ci.org/akuma/evermark
+[build-image-win]: https://ci.appveyor.com/api/projects/status/qy14tkl3qk8f5nl3/branch/master?svg=true
+[build-url-win]: https://ci.appveyor.com/project/akuma/evermark/branch/master
 [coverage-image]: https://coveralls.io/repos/github/akuma/evermark/badge.svg?branch=master
 [coverage-url]: https://coveralls.io/github/akuma/evermark?branch=master
 [david-image]: https://david-dm.org/akuma/evermark.svg
