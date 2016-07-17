@@ -102,7 +102,7 @@ export default class Evermark {
     })
 
     const { absolutePath, relativePath } = await this.getNotePathInfo(notePath)
-    const note = Note.findOne({ path: relativePath.replace('\\', '/') }) // fix windows issue
+    const note = Note.findOne({ path: relativePath })
 
     if (!note) {
       throw new EvermarkError(`${notePath} is not a published note`)
@@ -125,7 +125,7 @@ export default class Evermark {
 
     const { absolutePath, relativePath } = await this.getNotePathInfo(notePath)
     note.absolutePath = absolutePath
-    note.relativePath = relativePath.replace('\\', '/') // fix windows issue
+    note.relativePath = relativePath
 
     const tokens = this.md.parse(content, {})
 
@@ -267,11 +267,15 @@ export default class Evermark {
 
   async getNotePathInfo(notePath) {
     const configDir = await this.getConfigDir()
+
     const absolutePath = path.isAbsolute(notePath) ?
       notePath : path.resolve(notePath)
     const relativePath = path.relative(configDir, absolutePath)
+      .replace('\\', '/') // fix windows issue
+
     debug('absolute notePath: %s', absolutePath)
     debug('relative notePath: %s', relativePath)
+
     return { absolutePath, relativePath }
   }
 
