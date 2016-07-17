@@ -4,7 +4,7 @@ import fileUtils from './fileUtils'
 
 const debug = require('debug')('db')
 
-export default class DB {
+export default class Db {
   constructor(dbPath) {
     debug('dbPath: %s', dbPath)
     this.dbPath = dbPath

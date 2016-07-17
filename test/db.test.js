@@ -3,13 +3,13 @@ import test from 'ava'
 import Database from 'warehouse'
 import Model from 'warehouse/lib/model'
 import Document from 'warehouse/lib/document'
-import DB from '../src/db'
+import Db from '../src/db'
 import fileUtils from '../src/fileUtils'
 
 const fixturesDir = `${__dirname}${path.sep}fixtures`
 const testDir = `${__dirname}${path.sep}db-test`
 const dbPath = `${testDir}${path.sep}evermark.db`
-const db = new DB(dbPath)
+const db = new Db(dbPath)
 
 test.before(async () => {
   await fileUtils.remove(testDir)

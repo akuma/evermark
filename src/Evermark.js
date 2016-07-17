@@ -17,7 +17,7 @@ import EvernoteClient, {
   DEFAULT_RESOURCE_TYPE,
   RESOURCE_TYPES,
 } from './EvernoteClient'
-import DB from './db'
+import Db from './db'
 import fileUtils from './fileUtils'
 import config, { APP_NAME } from './config'
 import EvermarkError from './EvermarkError'
@@ -94,7 +94,7 @@ export default class Evermark {
   }
 
   async unpublishNote(notePath) {
-    const db = await this.getDB()
+    const db = await this.getDb()
     const Note = await db.model('notes', {
       guid: { type: String, required: true },
       path: { type: String, required: true },
@@ -153,7 +153,7 @@ export default class Evermark {
   }
 
   async doSaveNote(note) {
-    const db = await this.getDB()
+    const db = await this.getDb()
     const Note = await db.model('notes', {
       guid: { type: String, required: true },
       path: { type: String, required: true },
@@ -253,14 +253,14 @@ export default class Evermark {
     return path.dirname(configPath)
   }
 
-  getDB() {
+  getDb() {
     if (this.db) {
       return Promise.resolve(this.db)
     }
 
     return config.getDbPath(this.workDir)
       .then(dbPath => {
-        this.db = new DB(dbPath)
+        this.db = new Db(dbPath)
         return this.db
       })
   }
