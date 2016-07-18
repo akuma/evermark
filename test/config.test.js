@@ -4,11 +4,11 @@ import fileUtils from '../src/fileUtils'
 import config from '../src/config'
 import utils from './helpers/utils'
 
-const fixturesDir = `${__dirname}${path.sep}fixtures`
+const fixturesDir = path.join(__dirname, 'fixtures')
 
 function getTestDir(root = false) {
-  const rootDir = `${__dirname}${path.sep}config-test`
-  return root ? rootDir : `${rootDir}${path.sep}${utils.randomString()}`
+  const rootDir = path.join(__dirname, 'config-test')
+  return root ? rootDir : path.join(rootDir, utils.randomString())
 }
 
 test.before(async () => {
@@ -24,9 +24,9 @@ test('should getConfigPath', async t => {
   await fileUtils.fs.copyAsync(fixturesDir, testDir)
 
   const configPath = await config.getConfigPath(testDir)
-  t.is(configPath, `${testDir}${path.sep}evermark.json`)
+  t.is(configPath, path.join(testDir, 'evermark.json'))
 
-  t.throws(config.getConfigPath(`${path.sep}test`),
+  t.throws(config.getConfigPath(path.join('/test')),
     'Please run `evermark init [destination]` to init a new Evermark folder')
 })
 
@@ -35,7 +35,7 @@ test('should getDbPath', async t => {
   await fileUtils.fs.copyAsync(fixturesDir, testDir)
 
   const dbPath = await config.getDbPath(testDir)
-  t.is(dbPath, `${testDir}${path.sep}evermark.db`)
+  t.is(dbPath, path.join(testDir, 'evermark.db'))
 })
 
 test('should readConfig', async t => {
@@ -53,7 +53,7 @@ test('should readConfig error when config file invalid', async t => {
     'Please run `evermark init [destination]` to init a new Evermark folder')
 
   const testDir = getTestDir()
-  const configPath = `${testDir}${path.sep}evermark.json`
+  const configPath = path.join(testDir, 'evermark.json')
   await fileUtils.fs.copyAsync(fixturesDir, testDir)
 
   await fileUtils.writeFile(configPath, 'token')
@@ -137,7 +137,7 @@ test('should initConfig', async t => {
   t.false(conf.sandbox)
   t.is(conf.highlight, 'github')
 
-  testDir = `${testDir}${path.sep}`
+  testDir = path.join(testDir, '/')
   await config.initConfig(testDir)
 
   conf = await config.readConfig(testDir)

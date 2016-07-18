@@ -8,11 +8,11 @@ import Evermark from '../src/Evermark'
 import fileUtils from '../src/fileUtils'
 import utils from './helpers/utils'
 
-const fixturesDir = `${__dirname}${path.sep}fixtures`
+const fixturesDir = path.join(__dirname, 'fixtures')
 
 function getTestDir(root = false) {
-  const rootDir = `${__dirname}${path.sep}evermark-test`
-  return root ? rootDir : `${rootDir}${path.sep}${utils.randomString()}`
+  const rootDir = path.join(__dirname, 'evermark-test')
+  return root ? rootDir : path.join(rootDir, utils.randomString())
 }
 
 test.before(async () => {
@@ -30,28 +30,28 @@ test('should create local note', async t => {
 
   let title = 'test'
   let notePath = await evermark.createLocalNote(title)
-  t.is(notePath, `${testDir}${path.sep}notes${path.sep}${title}.md`)
+  t.is(notePath, path.join(testDir, `notes/${title}.md`))
   let noteContent = await fileUtils.readFile(notePath)
   t.is(noteContent, `# ${title}\n`)
 
   notePath = await evermark.createLocalNote(title)
-  t.is(notePath, `${testDir}${path.sep}notes${path.sep}${title}-1.md`)
+  t.is(notePath, path.join(testDir, `notes/${title}-1.md`))
   noteContent = await fileUtils.readFile(notePath)
   t.is(noteContent, `# ${title}\n`)
 
   title = '/-foo/---bar///---'
   notePath = await evermark.createLocalNote(title)
-  t.is(notePath, `${testDir}${path.sep}notes${path.sep}foo-bar.md`)
+  t.is(notePath, path.join(testDir, 'notes/foo-bar.md'))
   noteContent = await fileUtils.readFile(notePath)
   t.is(noteContent, `# ${title}\n`)
 
   notePath = await evermark.createLocalNote(title)
-  t.is(notePath, `${testDir}${path.sep}notes${path.sep}foo-bar-1.md`)
+  t.is(notePath, path.join(testDir, 'notes/foo-bar-1.md'))
   noteContent = await fileUtils.readFile(notePath)
   t.is(noteContent, `# ${title}\n`)
 
   notePath = await evermark.createLocalNote(title)
-  t.is(notePath, `${testDir}${path.sep}notes${path.sep}foo-bar-2.md`)
+  t.is(notePath, path.join(testDir, 'notes/foo-bar-2.md'))
   noteContent = await fileUtils.readFile(notePath)
   t.is(noteContent, `# ${title}\n`)
 })
@@ -72,7 +72,7 @@ test('should create note if it is not exist', async () => {
     .once()
   clientMock.expects('updateNote').never()
 
-  const notePath = `${testDir}${path.sep}notes${path.sep}a.md`
+  const notePath = path.join(testDir, 'notes/a.md')
   await evermark.publishNote(notePath)
 
   clientMock.verify()
@@ -97,7 +97,7 @@ test('should update note if it is exist', async () => {
     .returns(Promise.resolve(note))
     .once()
 
-  const notePath = `${testDir}${path.sep}notes${path.sep}a.md`
+  const notePath = path.join(testDir, 'notes/a.md')
   await evermark.publishNote(notePath)
   await evermark.publishNote(notePath)
 
@@ -126,7 +126,7 @@ test('should create note if update note is not exist', async () => {
   clientMock.expects('createNote')
     .returns(Promise.resolve(note))
     .once()
-  const notePath = `${testDir}${path.sep}notes${path.sep}b.md`
+  const notePath = path.join(testDir, 'notes/b.md')
   await evermark.publishNote(notePath)
 
   clientMock.verify()
@@ -156,7 +156,7 @@ test('should create notebook if it is not exist', async () => {
     .returns(Promise.resolve([{ guid: 'foo', name: notebookName }]))
     .once()
 
-  const notePath = `${testDir}${path.sep}notes${path.sep}c.md`
+  const notePath = path.join(testDir, 'notes/c.md')
   await evermark.publishNote(notePath)
 
   clientMock.verify()
@@ -183,7 +183,7 @@ test('should not create notebook if it is exist', async () => {
     .once()
   clientMock.expects('createNotebook').never()
 
-  const notePath = `${testDir}${path.sep}notes${path.sep}d.md`
+  const notePath = path.join(testDir, 'notes/d.md')
   await evermark.publishNote(notePath)
 
   clientMock.verify()
@@ -204,13 +204,13 @@ test('should unpublish note', async t => {
   clientMock.expects('createNote').returns(Promise.resolve(note))
   clientMock.expects('expungeNote').returns(Promise.resolve(1))
 
-  const notePath = `${testDir}${path.sep}notes${path.sep}a.md`
+  const notePath = path.join(testDir, 'notes/a.md')
   await evermark.publishNote(notePath)
   const result = await evermark.unpublishNote(notePath)
   t.is(result, notePath)
 
-  t.throws(evermark.unpublishNote(`${path.sep}not${path.sep}exist${path.sep}note.md`),
-    `${path.sep}not${path.sep}exist${path.sep}note.md is not a published note`)
+  const notExistNote = path.join('/not/exist/note.md')
+  t.throws(evermark.unpublishNote(notExistNote), `${notExistNote} is not a published note`)
 
   clientMock.verify()
   clientMock.restore()

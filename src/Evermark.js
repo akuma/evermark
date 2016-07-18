@@ -24,9 +24,8 @@ import EvermarkError from './EvermarkError'
 
 const debug = require('debug')('evermark')
 
-const MARKDOWN_THEME_PATH = `${__dirname}${path.sep}..${path.sep}themes`
-const HIGHLIGHT_THEME_PATH = `${__dirname}${path.sep}..${path.sep}node_modules` +
-  `${path.sep}highlight.js${path.sep}styles`
+const MARKDOWN_THEME_PATH = path.join(__dirname, '../themes')
+const HIGHLIGHT_THEME_PATH = path.join(__dirname, '../node_modules/highlight.js/styles')
 
 const DEFAULT_HIGHLIGHT_THEME = 'github'
 
@@ -81,8 +80,7 @@ export default class Evermark {
     const filename = title.replace(/(\/|-)+/g, '-').replace(/^-|-$/g, '')
 
     // Get unique note path and create note file
-    const notePath = await fileUtils.uniquePath(
-      `${configDir}${path.sep}notes${path.sep}${filename}.md`)
+    const notePath = await fileUtils.uniquePath(path.join(configDir, `notes/${filename}.md`))
     await fileUtils.writeFile(notePath, `# ${title}\n`)
 
     return notePath
@@ -316,8 +314,8 @@ export default class Evermark {
 
     // Html with styles
     const styles = await Promise.all([
-      fileUtils.readFile(`${MARKDOWN_THEME_PATH}${path.sep}github.css`),
-      fileUtils.readFile(`${HIGHLIGHT_THEME_PATH}${path.sep}${highlightTheme}.css`),
+      fileUtils.readFile(path.join(MARKDOWN_THEME_PATH, 'github.css')),
+      fileUtils.readFile(path.join(HIGHLIGHT_THEME_PATH, `${highlightTheme}.css`)),
     ])
     const styleHtml = `<style>${styles[0]}${styles[1]}</style>` +
       `<div class="markdown-body">${markedHtml}</div>`
@@ -353,7 +351,7 @@ export default class Evermark {
       const imgType = RESOURCE_TYPES[extname] || DEFAULT_RESOURCE_TYPE
       img.attribs.type = imgType // eslint-disable-line
 
-      const image = await fileUtils.readFile(`${configDir}${path.sep}notes${path.sep}${src}`, null)
+      const image = await fileUtils.readFile(path.join(configDir, `notes/${src}`), null)
 
       const md5 = crypto.createHash('md5')
       md5.update(image)

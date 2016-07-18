@@ -25,7 +25,7 @@ function getDbPath(workDir) {
   return getConfigPath(workDir)
     .then(configPath => {
       const dbDir = path.dirname(configPath)
-      return `${dbDir}${path.sep}${APP_DB_NAME}`
+      return path.join(dbDir, APP_DB_NAME)
     })
 }
 

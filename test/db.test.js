@@ -6,9 +6,9 @@ import Document from 'warehouse/lib/document'
 import Db from '../src/db'
 import fileUtils from '../src/fileUtils'
 
-const fixturesDir = `${__dirname}${path.sep}fixtures`
-const testDir = `${__dirname}${path.sep}db-test`
-const dbPath = `${testDir}${path.sep}evermark.db`
+const fixturesDir = path.join(__dirname, 'fixtures')
+const testDir = path.join(__dirname, 'db-test')
+const dbPath = path.join(testDir, 'evermark.db')
 const db = new Db(dbPath)
 
 test.before(async () => {

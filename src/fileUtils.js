@@ -101,7 +101,7 @@ function uniquePath(file) {
           maxSerial = parseInt(maxSerialFilename.replace(filenameRegex, '$1'), 10)
         }
 
-        return `${dirname}${path.sep}${basename}-${maxSerial + 1}${extname}`
+        return path.join(dirname, `${basename}-${maxSerial + 1}${extname}`)
       }
 
       return absolutePath
