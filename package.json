@@ -1,7 +1,7 @@
 {
   "name": "evermark",
   "version": "0.6.0",
-  "description": "A command line tool for syncing markdown files to Evernote :elephant:",
+  "description": "A command line tool for syncing markdown files to Evernote 🐘",
   "license": "MIT",
   "repository": "akuma/evermark",
   "author": "Weijia Huang <ihuangwj@gmail.com>",
