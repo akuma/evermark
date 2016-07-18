@@ -269,7 +269,7 @@ export default class Evermark {
     const absolutePath = path.isAbsolute(notePath) ?
       notePath : path.resolve(notePath)
     const relativePath = path.relative(configDir, absolutePath)
-      .replace('\\', '/') // fix windows issue
+      .replace(/\\/g, '/') // fix windows issue
 
     debug('absolute notePath: %s', absolutePath)
     debug('relative notePath: %s', relativePath)
