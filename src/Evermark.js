@@ -87,7 +87,18 @@ export default class Evermark {
   }
 
   async publishNote(notePath) {
-    const content = await fileUtils.readFile(notePath)
+    let content
+
+    try {
+      content = await fileUtils.readFile(notePath)
+    } catch (err) {
+      if (err.code === 'ENOENT') {
+        throw new EvermarkError(`${notePath} is not exist`)
+      }
+
+      throw err
+    }
+
     return this.saveNote(notePath, content)
   }
 
