@@ -7,5 +7,6 @@ script:
   - npm test
 after_success:
   - npm run coveralls
+  - bash <(curl -s https://codecov.io/bash)
 matrix:
   fast_finish: true
