@@ -56,7 +56,7 @@ test('should create local note', async t => {
   t.is(noteContent, `# ${title}\n`)
 })
 
-test('should create note if it is not exist', async () => {
+test('should create note if the note does not exist', async () => {
   const testDir = getTestDir()
   await fileUtils.fs.copyAsync(fixturesDir, testDir)
   const evermark = new Evermark(testDir)
@@ -79,7 +79,7 @@ test('should create note if it is not exist', async () => {
   clientMock.restore()
 })
 
-test('should update note if it is exist', async () => {
+test('should update note if the note exists', async () => {
   const testDir = getTestDir()
   await fileUtils.fs.copyAsync(fixturesDir, testDir)
   const evermark = new Evermark(testDir)
@@ -105,7 +105,7 @@ test('should update note if it is exist', async () => {
   clientMock.restore()
 })
 
-test('should create note if update note is not exist', async () => {
+test('should create note if the note which to update does not exist', async () => {
   const testDir = getTestDir()
   await fileUtils.fs.copyAsync(fixturesDir, testDir)
   const evermark = new Evermark(testDir)
@@ -133,7 +133,7 @@ test('should create note if update note is not exist', async () => {
   clientMock.restore()
 })
 
-test('should create notebook if it is not exist', async () => {
+test('should create notebook if the notebook does not exist', async () => {
   const testDir = getTestDir()
   await fileUtils.fs.copyAsync(fixturesDir, testDir)
   const evermark = new Evermark(testDir)
@@ -163,7 +163,7 @@ test('should create notebook if it is not exist', async () => {
   clientMock.restore()
 })
 
-test('should not create notebook if it is exist', async () => {
+test('should not create notebook if the notebook exists', async () => {
   const testDir = getTestDir()
   await fileUtils.fs.copyAsync(fixturesDir, testDir)
   const evermark = new Evermark(testDir)

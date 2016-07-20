@@ -93,7 +93,7 @@ export default class Evermark {
       content = await fileUtils.readFile(notePath)
     } catch (err) {
       if (err.code === 'ENOENT') {
-        throw new EvermarkError(`${notePath} is not exist`)
+        throw new EvermarkError(`${notePath} does not exist`)
       }
 
       throw err
