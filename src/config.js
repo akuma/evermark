@@ -76,13 +76,21 @@ function setConfig(name, value, workDir) {
 
 function initConfig(destination = '.') {
   const dest = destination.endsWith(path.sep) ? destination : `${destination}${path.sep}`
-  const config = {
-    token: 'Your developer token',
-    china: true,
-    sandbox: false,
-    highlight: 'github',
-  }
-  return saveConfig(`${dest}${APP_CONFIG_NAME}`, config)
+  const configPath = `${dest}${APP_CONFIG_NAME}`
+  return fileUtils.exists(configPath)
+    .then(exist => {
+      if (exist) {
+        throw new EvermarkError('Current directory does already inited')
+      }
+
+      const config = {
+        token: 'Your developer token',
+        china: true,
+        sandbox: false,
+        highlight: 'github',
+      }
+      return saveConfig(configPath, config)
+    })
 }
 
 function saveConfig(file, config) {

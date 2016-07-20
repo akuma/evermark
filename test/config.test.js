@@ -48,7 +48,7 @@ test('should readConfig', async t => {
   t.true(conf.sandbox)
 })
 
-test('should readConfig error when config file invalid', async t => {
+test('should readConfig error if config file invalid', async t => {
   t.throws(config.readConfig(),
     'Please run `evermark init [destination]` to init a new Evermark folder')
 
@@ -118,7 +118,7 @@ test('should setConfig', async t => {
   t.is(conf.hi, undefined)
 })
 
-test('should setConfig error when json stringify error', async t => {
+test('should setConfig error if json stringify error', async t => {
   const testDir = getTestDir()
   await fileUtils.fs.copyAsync(fixturesDir, testDir)
 
@@ -137,7 +137,7 @@ test('should initConfig', async t => {
   t.false(conf.sandbox)
   t.is(conf.highlight, 'github')
 
-  testDir = path.join(testDir, '/')
+  testDir = path.join(getTestDir(), '/')
   await config.initConfig(testDir)
 
   conf = await config.readConfig(testDir)
@@ -145,4 +145,6 @@ test('should initConfig', async t => {
   t.true(conf.china)
   t.false(conf.sandbox)
   t.is(conf.highlight, 'github')
+
+  t.throws(config.initConfig(testDir), 'Current directory does already inited')
 })
