@@ -15,6 +15,7 @@ const ora = require('ora')
 const chalk = require('chalk')
 const program = require('commander')
 const pkg = require('../package.json')
+
 const { Evermark, config } = require(DEV ? '../src' : '../lib')
 
 const magenta = chalk.magenta
