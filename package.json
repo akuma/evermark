@@ -43,7 +43,7 @@
     "debug": "^2.2.0",
     "evernote": "^1.25.82",
     "fs-extra": "^0.30.0",
-    "highlight.js": "^9.5.0",
+    "highlight.js": "^9.6.0",
     "inline-css": "^2.2.2",
     "markdown-it": "^7.0.0",
     "markdown-it-emoji": "^1.2.0",
