@@ -240,6 +240,10 @@ export default class Evermark {
 
     return this.getConfig()
       .then(options => {
+        if (this.evernoteClient) {
+          return this.evernoteClient
+        }
+
         this.evernoteClient = new EvernoteClient(options)
         return this.evernoteClient
       })
