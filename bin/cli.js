@@ -10,12 +10,14 @@ if (DEV) {
 require('babel-polyfill')
 
 const os = require('os')
+const path = require('path')
 const co = require('co')
 const ora = require('ora')
 const chalk = require('chalk')
 const program = require('commander')
 const pkg = require('../package.json')
 
+const fileUtils = require(DEV ? '../src/fileUtils' : '../lib/fileUtils').default
 const { Evermark, config } = require(DEV ? '../src' : '../lib')
 
 const magenta = chalk.magenta
@@ -55,11 +57,11 @@ const commands = {
     },
   },
   publish: {
-    cmd: 'publish <file>',
-    desc: 'Publish a local note to Evernote.',
+    cmd: 'publish <file or directory>',
+    desc: 'Publish local note(s) to Evernote.',
     action: publishNote,
     args: {
-      '<file>': 'Note file path.',
+      '<file or directory>': 'Note file path or note directory path.',
     },
   },
   unpublish: {
@@ -204,9 +206,22 @@ function newNote(title) {
 
 function publishNote(file) {
   exeCmd(function* fn() {
+    const fs = fileUtils.fs
     const evermark = new Evermark()
-    const note = yield evermark.publishNote(file)
-    info(`Published note: ${tildify(note.absolutePath)}`)
+
+    const isDirectory = (yield fs.statAsync(file)).isDirectory()
+    if (isDirectory) {
+      const files = (yield fs.readdirAsync(file))
+        .filter(f => f.endsWith('.md'))
+        .map(f => path.join(file, f))
+      const notes = yield Promise.all(files.map(f => evermark.publishNote(f)))
+
+      info(`Published ${notes.length} note(s).`)
+      notes.forEach(note => info(`Published note: ${tildify(note.absolutePath)}`))
+    } else {
+      const note = yield evermark.publishNote(file)
+      info(`Published note: ${tildify(note.absolutePath)}`)
+    }
   }, true)
 }
 
