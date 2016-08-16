@@ -234,10 +234,6 @@ export default class Evermark {
   }
 
   getEvernoteClient() {
-    if (this.evernoteClient) {
-      return Promise.resolve(this.evernoteClient)
-    }
-
     return this.getConfig()
       .then(options => {
         if (this.evernoteClient) {
@@ -256,8 +252,12 @@ export default class Evermark {
 
     return config.readConfig(this.workDir)
       .then(conf => {
+        if (this.config) {
+          return this.config
+        }
+
         this.config = conf
-        return conf
+        return this.config
       })
   }
 
@@ -273,6 +273,10 @@ export default class Evermark {
 
     return config.getDbPath(this.workDir)
       .then(dbPath => {
+        if (this.db) {
+          return this.db
+        }
+
         this.db = new Db(dbPath)
         return this.db
       })
