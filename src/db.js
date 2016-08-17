@@ -8,7 +8,6 @@ export default class Db {
   constructor(dbPath) {
     debug('dbPath: %s', dbPath)
     this.dbPath = dbPath
-    this.models = {}
   }
 
   get() {
@@ -19,6 +18,10 @@ export default class Db {
     const path = this.dbPath
     return fileUtils.ensureFile(path)
       .then(() => {
+        if (this.db) {
+          return this.db
+        }
+
         this.db = new Database({ path })
         return this.db.load()
       })
