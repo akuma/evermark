@@ -195,6 +195,7 @@ export default class Evermark {
       await Note.insert({ guid: createdNote.guid, path: note.relativePath })
     }
     await db.save()
+
     return createdNote
   }
 
