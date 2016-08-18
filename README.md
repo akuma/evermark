@@ -75,7 +75,7 @@ evermark new <title>
 将 markdown 文件发布到 Evernote，对于已发布过的文件会采取更新操作。
 
 ```bash
-evermark publish <file>
+evermark publish <file_or_directory>
 ```
 
 ### 撤销笔记
