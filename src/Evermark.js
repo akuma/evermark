@@ -195,7 +195,6 @@ export default class Evermark {
       await Note.insert({ guid: createdNote.guid, path: note.relativePath })
     }
     await db.save()
-
     return createdNote
   }
 
@@ -234,31 +233,19 @@ export default class Evermark {
   }
 
   getEvernoteClient() {
-    return this.getConfig()
-      .then(options => {
-        if (this.evernoteClient) {
-          return this.evernoteClient
-        }
-
-        this.evernoteClient = new EvernoteClient(options)
-        return this.evernoteClient
-      })
+    if (!this.evernoteClient) {
+      this.evernoteClient = this.getConfig()
+        .then(options => new EvernoteClient(options))
+    }
+    return this.evernoteClient
   }
 
   getConfig() {
-    if (this.config) {
-      return Promise.resolve(this.config)
+    if (!this.config) {
+      this.config = config.readConfig(this.workDir)
+        .then(conf => conf)
     }
-
-    return config.readConfig(this.workDir)
-      .then(conf => {
-        if (this.config) {
-          return this.config
-        }
-
-        this.config = conf
-        return this.config
-      })
+    return this.config
   }
 
   async getConfigDir() {
@@ -267,19 +254,11 @@ export default class Evermark {
   }
 
   getDb() {
-    if (this.db) {
-      return Promise.resolve(this.db)
+    if (!this.db) {
+      this.db = config.getDbPath(this.workDir)
+        .then(dbPath => new Db(dbPath))
     }
-
-    return config.getDbPath(this.workDir)
-      .then(dbPath => {
-        if (this.db) {
-          return this.db
-        }
-
-        this.db = new Db(dbPath)
-        return this.db
-      })
+    return this.db
   }
 
   async getNotePathInfo(notePath) {

@@ -1,4 +1,3 @@
-import Promise from 'bluebird'
 import Database from 'warehouse'
 import fileUtils from './fileUtils'
 
@@ -11,21 +10,15 @@ export default class Db {
   }
 
   get() {
-    if (this.db) {
-      return Promise.resolve(this.db)
+    if (!this.db) {
+      const path = this.dbPath
+      this.db = fileUtils.ensureFile(path)
+        .then(() => {
+          const db = new Database({ path })
+          return db.load().then(() => db)
+        })
     }
-
-    const path = this.dbPath
-    return fileUtils.ensureFile(path)
-      .then(() => {
-        if (this.db) {
-          return this.db
-        }
-
-        this.db = new Database({ path })
-        return this.db.load()
-      })
-      .then(() => this.db)
+    return this.db
   }
 
   save() {
