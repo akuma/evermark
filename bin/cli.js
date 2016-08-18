@@ -57,11 +57,11 @@ const commands = {
     },
   },
   publish: {
-    cmd: 'publish <file or directory>',
+    cmd: 'publish <file_or_directory>',
     desc: 'Publish local note(s) to Evernote.',
     action: publishNote,
     args: {
-      '<file or directory>': 'Note file path or note directory path.',
+      '<file_or_directory>': 'Note file path or note directory path.',
     },
   },
   unpublish: {
