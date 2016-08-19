@@ -26,12 +26,12 @@
 
 - [x] 支持基于命令行添加、发布 Markdown 格式的笔记
 - [x] 支持自动添加在笔记内容中指定的笔记本和标签
+- [x] 支持发布或撤销某个目录下的所有 Markdown 笔记
 - [x] 支持高亮代码块、图片引用、表格等
 - [x] 支持任务列表
 - [ ] 支持流程图、序列图、甘特图
 - [ ] 支持数学公式
 - [ ] 支持发布多个 Markdown 笔记
-- [x] 支持发布目录下的所有 Markdown 笔记
 
 -------------------
 
@@ -83,7 +83,7 @@ evermark publish <file_or_directory>
 在 Evernote 中删除 markdown 文件对应的笔记，markdown 文件不会删除。
 
 ```bash
-evermark unpublish <file>
+evermark unpublish <file_or_directory>
 ```
 
 ### 查看帮助
