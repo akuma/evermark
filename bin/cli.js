@@ -20,6 +20,7 @@ const pkg = require('../package.json')
 const fileUtils = require(DEV ? '../src/fileUtils' : '../lib/fileUtils').default
 const { Evermark, config } = require(DEV ? '../src' : '../lib')
 
+const fs = fileUtils.fs
 const magenta = chalk.magenta
 
 program
@@ -65,11 +66,11 @@ const commands = {
     },
   },
   unpublish: {
-    cmd: 'unpublish <file>',
-    desc: 'Remove a note from Evernote.',
+    cmd: 'unpublish <file_or_directory>',
+    desc: 'Remove note(s) from Evernote.',
     action: unpublish,
     args: {
-      '<file>': 'Note file path.',
+      '<file_or_directory>': 'Note file path or note directory path.',
     },
   },
   help: {
@@ -204,31 +205,42 @@ function newNote(title) {
   })
 }
 
-function publishNote(file) {
+function publishNote(fileOrDir) {
   exeCmd(function* fn() {
-    const fs = fileUtils.fs
     const evermark = new Evermark()
 
-    const isDirectory = (yield fs.statAsync(file)).isDirectory()
+    const isDirectory = (yield fs.statAsync(fileOrDir)).isDirectory()
     if (isDirectory) {
-      const files = (yield fs.readdirAsync(file))
+      const files = (yield fs.readdirAsync(fileOrDir))
         .filter(f => f.endsWith('.md'))
-        .map(f => path.join(file, f))
+        .map(f => path.join(fileOrDir, f))
       const notes = yield Promise.all(files.map(f => evermark.publishNote(f)))
 
       info(`Published ${notes.length} note(s).`)
       notes.forEach(note => info(`Published note: ${tildify(note.absolutePath)}`))
     } else {
-      const note = yield evermark.publishNote(file)
+      const note = yield evermark.publishNote(fileOrDir)
       info(`Published note: ${tildify(note.absolutePath)}`)
     }
   }, true)
 }
 
-function unpublish(file) {
+function unpublish(fileOrDir) {
   exeCmd(function* fn() {
     const evermark = new Evermark()
-    const notePath = yield evermark.unpublishNote(file)
-    info(`Unpublished note: ${tildify(notePath)}`)
+
+    const isDirectory = (yield fs.statAsync(fileOrDir)).isDirectory()
+    if (isDirectory) {
+      const files = (yield fs.readdirAsync(fileOrDir))
+        .filter(f => f.endsWith('.md'))
+        .map(f => path.join(fileOrDir, f))
+      const notePaths = yield Promise.all(files.map(f => evermark.unpublishNote(f)))
+
+      info(`Unpublished ${notePaths.length} note(s).`)
+      notePaths.forEach(notePath => info(`Unpublished note: ${tildify(notePath)}`))
+    } else {
+      const notePath = yield evermark.unpublishNote(fileOrDir)
+      info(`Unpublished note: ${tildify(notePath)}`)
+    }
   }, true)
 }
