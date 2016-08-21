@@ -95,7 +95,7 @@ export default class EvernoteClient {
     serviceHost = sandbox ? 'sandbox.evernote.com' : serviceHost
 
     const options = { token, sandbox, serviceHost }
-    debug('options: %o', options)
+    debug('Evernote client options: %o', options)
     this.options = options
 
     const client = new Evernote.Client(options)
