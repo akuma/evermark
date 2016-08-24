@@ -67,6 +67,7 @@ function wrapError(exception) {
   if (exception.identifier) {
     error.code = OBJECT_NOT_FOUND
   }
+
   const codeStr = ERROR_CODES[error.code] || ERROR_CODES[UNKNOWN_ERROR]
   const message = `Evernote API Error: ${codeStr}`
 
