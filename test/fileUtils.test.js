@@ -1,5 +1,6 @@
 import path from 'path'
 import test from 'ava'
+import Promise from 'bluebird'
 import fileUtils from '../src/fileUtils'
 
 const testDir = path.join(__dirname, 'fileutils-test')
