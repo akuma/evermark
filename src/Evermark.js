@@ -48,7 +48,7 @@ export default class Evermark {
           try {
             return `<pre class="hljs"><code>${hljs.highlight(lang, code, true).value}</code></pre>`
           } catch (e) {
-            // ignore
+            // Ignore error
           }
         }
 
@@ -129,7 +129,7 @@ export default class Evermark {
     const noteAttrs = new Evernote.NoteAttributes()
     noteAttrs.source = APP_NAME
     noteAttrs.sourceApplication = APP_NAME
-    noteAttrs.contentClass = APP_NAME // make the note read-only
+    noteAttrs.contentClass = APP_NAME // Make the note read-only
     note.attributes = noteAttrs
 
     const { absolutePath, relativePath } = await this.getNotePathInfo(notePath)
@@ -268,7 +268,7 @@ export default class Evermark {
     const absolutePath = path.isAbsolute(notePath) ?
       notePath : path.resolve(notePath)
     const relativePath = path.relative(configDir, absolutePath)
-      .replace(/\\/g, '/') // fix windows issue
+      .replace(/\\/g, '/') // Fix windows issue
 
     debug('absolute notePath: %s', absolutePath)
     debug('relative notePath: %s', relativePath)
