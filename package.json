@@ -50,6 +50,8 @@
     "markdown-it-enml-todo": "^1.0.1",
     "markdown-it-sub": "^1.0.0",
     "markdown-it-sup": "^1.0.0",
+    "mermaid": "^6.0.0",
+    "node-uuid": "^1.4.7",
     "ora": "^0.3.0",
     "warehouse": "^2.2.0"
   },
