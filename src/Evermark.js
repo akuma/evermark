@@ -3,6 +3,7 @@
 import path from 'path'
 import crypto from 'crypto'
 import Promise from 'bluebird'
+import uuid from 'node-uuid'
 import cheerio from 'cheerio'
 import inlineCss from 'inline-css'
 import hljs from 'highlight.js'
@@ -11,6 +12,8 @@ import mdEmoji from 'markdown-it-emoji'
 import mdEnTodo from 'markdown-it-enml-todo'
 import mdSub from 'markdown-it-sub'
 import mdSup from 'markdown-it-sup'
+import mermaidCli from 'mermaid/lib/cli.js'
+import mermaidLib from 'mermaid/lib'
 import { Evernote } from 'evernote'
 import EvernoteClient, {
   OBJECT_NOT_FOUND,
@@ -33,6 +36,7 @@ export default class Evermark {
   constructor(workDir, options) {
     this.workDir = workDir
 
+    const mermaidCodes = []
     const md = new MarkdownIt({
       html: true, // Enable HTML tags in source
       linkify: true, // Autoconvert URL-like text to links
@@ -41,6 +45,7 @@ export default class Evermark {
       // or '' if the source string is not changed
       highlight(code, lang) {
         if (code.match(/^graph/) || code.match(/^sequenceDiagram/) || code.match(/^gantt/)) {
+          mermaidCodes.push(code)
           return `<div class="mermaid">${code}</div>`
         }
 
@@ -56,6 +61,7 @@ export default class Evermark {
       },
       ...options,
     })
+    this.mermaidCodes = mermaidCodes
 
     // Use some plugins
     md.use(mdEmoji)
@@ -329,6 +335,26 @@ export default class Evermark {
 
     const $ = cheerio.load(inlineStyleHtml)
     $('en-todo').removeAttr('style')
+
+    // Generate mermaid images
+    const mmdImgs = await Promise.map(this.mermaidCodes, async code => {
+      const mmdFile = `mermaid-res/${uuid.v4()}.mmd`
+      await fileUtils.writeFile(mmdFile, code)
+      mermaidCli.parse([mmdFile, '-o', 'mermaid-res'], (err, message, options) => {
+        if (err) {
+          const errs = err.map(e => e.message)
+          throw new EvermarkError(errs)
+        } else if (message) {
+          throw new EvermarkError(message)
+        }
+
+        mermaidLib.process(options.files, options, process.exit)
+      })
+
+      return `${mmdFile}.png`
+    })
+    console.log('mmdImages:', mmdImgs)
+
     await this.attchResources(note, $)
 
     // ENML is a superset of XHTML, so change html to xhtml
