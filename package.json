@@ -45,7 +45,7 @@
     "fs-extra": "^0.30.0",
     "highlight.js": "^9.6.0",
     "inline-css": "^2.2.2",
-    "markdown-it": "^7.0.1",
+    "markdown-it": "^8.0.0",
     "markdown-it-emoji": "^1.2.0",
     "markdown-it-enml-todo": "^1.0.1",
     "markdown-it-sub": "^1.0.0",
