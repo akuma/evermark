@@ -340,7 +340,7 @@ export default class Evermark {
     const mmdImgs = await Promise.map(this.mermaidCodes, async code => {
       const mmdFile = `mermaid-res/${uuid.v4()}.mmd`
       await fileUtils.writeFile(mmdFile, code)
-      mermaidCli.parse([mmdFile, '-o', 'mermaid-res'], (err, message, options) => {
+      mermaidCli.parse(['-p', '-o', 'mermaid-res', mmdFile], (err, message, options) => {
         if (err) {
           const errs = err.map(e => e.message)
           throw new EvermarkError(errs)
@@ -353,7 +353,7 @@ export default class Evermark {
 
       return `${mmdFile}.png`
     })
-    console.log('mmdImages:', mmdImgs)
+    debug('mmdImgs:', mmdImgs)
 
     await this.attchResources(note, $)
 
