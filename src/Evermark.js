@@ -354,6 +354,7 @@ export default class Evermark {
       return `${mmdFile}.png`
     })
     debug('mmdImgs:', mmdImgs)
+    $('.mermaid').replaceWith(() => mmdImgs.map(img => `<img src="${img}" alt="mermaid diagram">`))
 
     await this.attchResources(note, $)
 
