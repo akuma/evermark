@@ -313,6 +313,28 @@ export default class Evermark {
     const markedHtml = this.md.renderer.render(tokens, this.md.options)
     debug('markedHtml: %s', markedHtml)
 
+    // Generate mermaid images
+    let $ = cheerio.load(markedHtml)
+    const mmdImgs = await Promise.map(this.mermaidCodes, async code => {
+      const mmdFile = `mermaid-res/${uuid.v4()}.mmd`
+      await fileUtils.writeFile(mmdFile, code)
+      mermaidCli.parse(['-p', '-o', 'mermaid-res', mmdFile], (err, message, options) => {
+        if (err) {
+          const errs = err.map(e => e.message)
+          throw new EvermarkError(errs)
+        } else if (message) {
+          throw new EvermarkError(message)
+        }
+
+        mermaidLib.process(options.files, options, process.exit)
+      })
+
+      return `${mmdFile}.png`
+    })
+    debug('mmdImgs:', mmdImgs)
+    // console.log($('.mermaid').length)
+    $('.mermaid').replaceWith(() => mmdImgs.map(img => `<img src="${img}" alt="mermaid diagram">`))
+
     // Get highlight theme from configuration
     const conf = await this.getConfig()
     const highlightTheme = conf.highlight || DEFAULT_HIGHLIGHT_THEME
@@ -333,29 +355,8 @@ export default class Evermark {
       removeHtmlSelectors: true,
     })
 
-    const $ = cheerio.load(inlineStyleHtml)
+    $ = cheerio.load(inlineStyleHtml)
     $('en-todo').removeAttr('style')
-
-    // Generate mermaid images
-    const mmdImgs = await Promise.map(this.mermaidCodes, async code => {
-      const mmdFile = `mermaid-res/${uuid.v4()}.mmd`
-      await fileUtils.writeFile(mmdFile, code)
-      mermaidCli.parse(['-p', '-o', 'mermaid-res', mmdFile], (err, message, options) => {
-        if (err) {
-          const errs = err.map(e => e.message)
-          throw new EvermarkError(errs)
-        } else if (message) {
-          throw new EvermarkError(message)
-        }
-
-        mermaidLib.process(options.files, options, process.exit)
-      })
-
-      return `${mmdFile}.png`
-    })
-    debug('mmdImgs:', mmdImgs)
-    $('.mermaid').replaceWith(() => mmdImgs.map(img => `<img src="${img}" alt="mermaid diagram">`))
-
     await this.attchResources(note, $)
 
     // ENML is a superset of XHTML, so change html to xhtml
