@@ -310,7 +310,7 @@ export default class Evermark {
   }
 
   async generateHtml(note, tokens) {
-    const markedHtml = this.md.renderer.render(tokens, this.md.options)
+    let markedHtml = this.md.renderer.render(tokens, this.md.options)
     debug('markedHtml: %s', markedHtml)
 
     // Generate mermaid images
@@ -334,6 +334,7 @@ export default class Evermark {
     debug('mmdImgs:', mmdImgs)
     // console.log($('.mermaid').length)
     $('.mermaid').replaceWith(() => mmdImgs.map(img => `<img src="${img}" alt="mermaid diagram">`))
+    markedHtml = $.xml()
 
     // Get highlight theme from configuration
     const conf = await this.getConfig()
