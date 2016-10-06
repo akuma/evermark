@@ -64,7 +64,7 @@ function writeFile(file, data) {
 
 /**
  * 根据文件名递归查找文件，直至到最顶层目录为止。
- * Recursively find files by file name, date up to the top level directory.
+ * Recursively find files by file name, until up to the top level directory.
  */
 function searchFile(filename, dir = `.${path.sep}`) {
   const aDir = dir.endsWith(path.sep) ? dir : `${dir}${path.sep}`
