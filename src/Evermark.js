@@ -316,25 +316,26 @@ export default class Evermark {
     // Generate mermaid images
     let $ = cheerio.load(markedHtml)
     const mmdImgs = await Promise.map(this.mermaidCodes, async code => {
-      const mmdFile = `mermaid-res/${uuid.v4()}.mmd`
+      const noteDir = 'notes/'
+      const mmdFile = `${noteDir}assets/${uuid.v4()}.mmd`
       await fileUtils.writeFile(mmdFile, code)
-      mermaidCli.parse(['-p', '-o', 'mermaid-res', mmdFile], (err, message, options) => {
-        if (err) {
-          const errs = err.map(e => e.message)
-          throw new EvermarkError(errs)
-        } else if (message) {
-          throw new EvermarkError(message)
-        }
-
-        mermaidLib.process(options.files, options, process.exit)
+      await new Promise((resolve, reject) => {
+        mermaidCli.parse(['-p', '-o', `${noteDir}assets`, mmdFile], (err, message, options) => {
+          if (err) {
+            reject(err)
+          } else if (message) {
+            reject(message)
+          } else {
+            mermaidLib.process(options.files, options, () => resolve())
+          }
+        })
       })
-
-      return `${mmdFile}.png`
+      return `${mmdFile.slice(noteDir.length)}.png`
     })
     debug('mmdImgs:', mmdImgs)
-    // console.log($('.mermaid').length)
     $('.mermaid').replaceWith(() => mmdImgs.map(img => `<img src="${img}" alt="mermaid diagram">`))
     markedHtml = $.xml()
+    debug('mermaidedHtml:', markedHtml)
 
     // Get highlight theme from configuration
     const conf = await this.getConfig()
