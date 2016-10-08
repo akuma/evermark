@@ -357,10 +357,10 @@ export default class Evermark {
     }
 
     const mmdImgs = await Promise.map(mermaidCodes, async code => {
-      const mmdFile = `${this.workDir}/${NOTE_DIAGRAM_PATH}/${this.genHash(code)}.mmd`
+      const mmdFile = path.join(this.workDir, NOTE_DIAGRAM_PATH, `${this.genHash(code)}.mmd`)
       await fileUtils.writeFile(mmdFile, code)
       await new Promise((resolve, reject) => {
-        mermaidCli.parse(['-p', '-o', `${this.workDir}/${NOTE_DIAGRAM_PATH}`, mmdFile],
+        mermaidCli.parse(['-p', '-o', path.join(this.workDir, NOTE_DIAGRAM_PATH), mmdFile],
           (err, message, options) => {
             if (err) {
               reject(err)
@@ -372,7 +372,7 @@ export default class Evermark {
           }
         )
       })
-      return `${mmdFile.slice(`${this.workDir}/${NOTE_PATH}/`.length)}.png`
+      return `${mmdFile.slice(path.join(this.workDir, NOTE_PATH).length + 1)}.png`
     })
     debug('mermaid images:', mmdImgs)
 
