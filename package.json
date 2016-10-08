@@ -53,6 +53,7 @@
     "mermaid": "^6.0.0",
     "node-uuid": "^1.4.7",
     "ora": "^0.3.0",
+    "phantomjs": "^2.1.7",
     "warehouse": "^2.2.0"
   },
   "devDependencies": {
