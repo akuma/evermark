@@ -3,7 +3,6 @@
 import path from 'path'
 import crypto from 'crypto'
 import Promise from 'bluebird'
-import uuid from 'node-uuid'
 import cheerio from 'cheerio'
 import inlineCss from 'inline-css'
 import hljs from 'highlight.js'
@@ -27,6 +26,8 @@ import EvermarkError from './EvermarkError'
 
 const debug = require('debug')('evermark')
 
+const NOTE_PATH = 'notes'
+const NOTE_DIAGRAM_PATH = `${NOTE_PATH}/diagrams`
 const MARKDOWN_THEME_PATH = path.join(__dirname, '../themes')
 const HIGHLIGHT_THEME_PATH = path.join(__dirname, '../node_modules/highlight.js/styles')
 
@@ -36,7 +37,6 @@ export default class Evermark {
   constructor(workDir, options) {
     this.workDir = workDir
 
-    const mermaidCodes = []
     const md = new MarkdownIt({
       html: true, // Enable HTML tags in source
       linkify: true, // Autoconvert URL-like text to links
@@ -45,7 +45,6 @@ export default class Evermark {
       // or '' if the source string is not changed
       highlight(code, lang) {
         if (code.match(/^graph/) || code.match(/^sequenceDiagram/) || code.match(/^gantt/)) {
-          mermaidCodes.push(code)
           return `<div class="mermaid">${code}</div>`
         }
 
@@ -61,7 +60,6 @@ export default class Evermark {
       },
       ...options,
     })
-    this.mermaidCodes = mermaidCodes
 
     // Use some plugins
     md.use(mdEmoji)
@@ -86,7 +84,7 @@ export default class Evermark {
     const filename = title.replace(/(\/|-)+/g, '-').replace(/^-|-$/g, '')
 
     // Get unique note path and create note file
-    const notePath = await fileUtils.uniquePath(path.join(configDir, `notes/${filename}.md`))
+    const notePath = await fileUtils.uniquePath(path.join(configDir, `${NOTE_PATH}/${filename}.md`))
     await fileUtils.writeFile(notePath, `# ${title}\n`)
 
     return notePath
@@ -313,29 +311,8 @@ export default class Evermark {
     let markedHtml = this.md.renderer.render(tokens, this.md.options)
     debug('markedHtml: %s', markedHtml)
 
-    // Generate mermaid images
-    let $ = cheerio.load(markedHtml)
-    const mmdImgs = await Promise.map(this.mermaidCodes, async code => {
-      const noteDir = 'notes/'
-      const mmdFile = `${noteDir}assets/${uuid.v4()}.mmd`
-      await fileUtils.writeFile(mmdFile, code)
-      await new Promise((resolve, reject) => {
-        mermaidCli.parse(['-p', '-o', `${noteDir}assets`, mmdFile], (err, message, options) => {
-          if (err) {
-            reject(err)
-          } else if (message) {
-            reject(message)
-          } else {
-            mermaidLib.process(options.files, options, () => resolve())
-          }
-        })
-      })
-      return `${mmdFile.slice(noteDir.length)}.png`
-    })
-    debug('mmdImgs:', mmdImgs)
-    $('.mermaid').replaceWith(() => mmdImgs.map(img => `<img src="${img}" alt="mermaid diagram">`))
-    markedHtml = $.xml()
-    debug('mermaidedHtml:', markedHtml)
+    // Generate mermaid diagrams
+    markedHtml = await this.genMermaidImages(markedHtml)
 
     // Get highlight theme from configuration
     const conf = await this.getConfig()
@@ -357,7 +334,7 @@ export default class Evermark {
       removeHtmlSelectors: true,
     })
 
-    $ = cheerio.load(inlineStyleHtml)
+    const $ = cheerio.load(inlineStyleHtml)
     $('en-todo').removeAttr('style')
     await this.attchResources(note, $)
 
@@ -365,6 +342,46 @@ export default class Evermark {
     const inlineStyleXhtml = $.xml()
     debug('inlineStyleXhtml: %s', inlineStyleXhtml)
     return inlineStyleXhtml
+  }
+
+  async genMermaidImages(markedHtml) {
+    const $ = cheerio.load(markedHtml)
+
+    const mermaidCodes = []
+    $('.mermaid').each((index, element) => {
+      mermaidCodes.push($(element).text())
+    })
+
+    if (!mermaidCodes.length) {
+      return $.html()
+    }
+
+    const mmdImgs = await Promise.map(mermaidCodes, async code => {
+      const mmdFile = `${NOTE_DIAGRAM_PATH}/${this.genHash(code)}.mmd`
+      await fileUtils.writeFile(mmdFile, code)
+      await new Promise((resolve, reject) => {
+        mermaidCli.parse(['-p', '-o', NOTE_DIAGRAM_PATH, mmdFile], (err, message, options) => {
+          if (err) {
+            reject(err)
+          } else if (message) {
+            reject(message)
+          } else {
+            mermaidLib.process(options.files, options, () => resolve())
+          }
+        })
+      })
+      return `${mmdFile.slice(NOTE_PATH.length + 1)}.png`
+    })
+    debug('mermaid images:', mmdImgs)
+
+    // Replace mermaid code with mermaid diagram
+    $('.mermaid').each((index, element) => {
+      $(element).replaceWith(`<img src="${mmdImgs[index]}" alt="mermaid diagram">`)
+    })
+
+    const result = $.html()
+    debug('mermaided html:', result)
+    return result
   }
 
   async attchResources(note, $) {
@@ -380,11 +397,8 @@ export default class Evermark {
       const imgType = RESOURCE_TYPES[extname] || DEFAULT_RESOURCE_TYPE
       img.attribs.type = imgType // eslint-disable-line
 
-      const image = await fileUtils.readFile(path.join(configDir, `notes/${src}`), null)
-
-      const md5 = crypto.createHash('md5')
-      md5.update(image)
-      img.attribs.hash = md5.digest('hex')
+      const image = await fileUtils.readFile(path.join(configDir, `${NOTE_PATH}/${src}`), null)
+      img.attribs.hash = this.genHash(image)
 
       const resource = new Evernote.Resource()
       resource.mime = 'image/jpg'
@@ -394,5 +408,11 @@ export default class Evermark {
       resource.data.size = image.length
       return resource
     })
+  }
+
+  genHash(data) {
+    const md5 = crypto.createHash('md5')
+    md5.update(data)
+    return md5.digest('hex')
   }
 }
