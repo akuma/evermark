@@ -29,7 +29,7 @@
 - [x] 支持发布或撤销某个目录下的所有 Markdown 笔记
 - [x] 支持高亮代码块、图片引用、表格等
 - [x] 支持任务列表
-- [ ] 支持流程图、序列图、甘特图
+- [x] 支持流程图、序列图、甘特图
 - [ ] 支持数学公式
 - [ ] 支持发布多个 Markdown 笔记
 
@@ -204,6 +204,34 @@ This is an inline code: `var example = true`
     ```js
     console.log('Hello world!')
     ```
+
+## Diagrams
+
+```
+graph LR
+  A-->B
+  B-->C
+  C-->A
+  D-->C
+```
+
+```
+sequenceDiagram
+  Alice->>John: Hello John, how are you?
+  John-->>Alice: Great!
+```
+
+```
+gantt
+  title A Gantt Diagram
+
+  section Section
+  A task           :a1, 2014-01-01, 30d
+  Another task     :after a1  , 20d
+  section Another
+  Task in sec      :2014-01-12  , 12d
+  anther task      : 24d
+```
 
 ### Raw HTML
 
