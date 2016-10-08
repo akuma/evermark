@@ -19,7 +19,7 @@ test.after(async () => {
   await fileUtils.remove(getTestDir(true))
 })
 
-test('should getConfigPath', async t => {
+test('should getConfigPath', async (t) => {
   const testDir = getTestDir()
   await fileUtils.fs.copyAsync(fixturesDir, testDir)
 
@@ -30,7 +30,7 @@ test('should getConfigPath', async t => {
     'Please run `evermark init [destination]` to init a new Evermark folder')
 })
 
-test('should getDbPath', async t => {
+test('should getDbPath', async (t) => {
   const testDir = getTestDir()
   await fileUtils.fs.copyAsync(fixturesDir, testDir)
 
@@ -38,7 +38,7 @@ test('should getDbPath', async t => {
   t.is(dbPath, path.join(testDir, 'evermark.db'))
 })
 
-test('should readConfig', async t => {
+test('should readConfig', async (t) => {
   const testDir = getTestDir()
   await fileUtils.fs.copyAsync(fixturesDir, testDir)
 
@@ -48,7 +48,7 @@ test('should readConfig', async t => {
   t.true(conf.sandbox)
 })
 
-test('should readConfig error if config file invalid', async t => {
+test('should readConfig error if config file invalid', async (t) => {
   t.throws(config.readConfig(),
     'Please run `evermark init [destination]` to init a new Evermark folder')
 
@@ -69,7 +69,7 @@ test('should readConfig error if config file invalid', async t => {
     'https://app.yinxiang.com/api/DeveloperToken.action')
 })
 
-test('should getConfig', async t => {
+test('should getConfig', async (t) => {
   const testDir = getTestDir()
   await fileUtils.fs.copyAsync(fixturesDir, testDir)
 
@@ -84,7 +84,7 @@ test('should getConfig', async t => {
   t.is(hello, undefined)
 })
 
-test('should setConfig', async t => {
+test('should setConfig', async (t) => {
   const testDir = getTestDir()
   await fileUtils.fs.copyAsync(fixturesDir, testDir)
 
@@ -118,7 +118,7 @@ test('should setConfig', async t => {
   t.is(conf.hi, undefined)
 })
 
-test('should setConfig error if json stringify error', async t => {
+test('should setConfig error if json stringify error', async (t) => {
   const testDir = getTestDir()
   await fileUtils.fs.copyAsync(fixturesDir, testDir)
 
@@ -127,7 +127,7 @@ test('should setConfig error if json stringify error', async t => {
   }, testDir), 'Mock stringify error')
 })
 
-test('should initConfig', async t => {
+test('should initConfig', async (t) => {
   let testDir = getTestDir()
   await config.initConfig(testDir)
 

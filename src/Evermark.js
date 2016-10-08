@@ -11,7 +11,7 @@ import mdEmoji from 'markdown-it-emoji'
 import mdEnTodo from 'markdown-it-enml-todo'
 import mdSub from 'markdown-it-sub'
 import mdSup from 'markdown-it-sup'
-import mermaidCli from 'mermaid/lib/cli.js'
+import mermaidCli from 'mermaid/lib/cli'
 import mermaidLib from 'mermaid/lib'
 import { Evernote } from 'evernote'
 import EvernoteClient, {
@@ -142,7 +142,7 @@ export default class Evermark {
 
     const tokens = this.md.parse(content, {})
 
-    const noteInfo = this.parseNoteInfo(tokens)
+    const noteInfo = Evermark.parseNoteInfo(tokens)
     note.title = noteInfo.noteTitle
 
     if (noteInfo.tagNames && noteInfo.tagNames.length) {
@@ -280,7 +280,7 @@ export default class Evermark {
     return { absolutePath, relativePath }
   }
 
-  parseNoteInfo(tokens = []) {
+  static parseNoteInfo(tokens = []) {
     const preTitleIndex = tokens.findIndex(token => token.type === 'heading_open')
     const titleToken = preTitleIndex >= 0 ? tokens[preTitleIndex + 1] : null
     const noteTitle = titleToken ? titleToken.content : 'untitled'
@@ -356,8 +356,8 @@ export default class Evermark {
       return $.html()
     }
 
-    const mmdImgs = await Promise.map(mermaidCodes, async code => {
-      const mmdFile = path.join(this.workDir, NOTE_DIAGRAM_PATH, `${this.genHash(code)}.mmd`)
+    const mmdImgs = await Promise.map(mermaidCodes, async (code) => {
+      const mmdFile = path.join(this.workDir, NOTE_DIAGRAM_PATH, `${Evermark.genHash(code)}.mmd`)
       await fileUtils.writeFile(mmdFile, code)
       await new Promise((resolve, reject) => {
         mermaidCli.parse(['-p', '-o', path.join(this.workDir, NOTE_DIAGRAM_PATH), mmdFile],
@@ -390,7 +390,7 @@ export default class Evermark {
     const configDir = await this.getConfigDir()
 
     const imgs = $('img').toArray().filter(img => !/^.+:\/\//.test(img.attribs.src))
-    note.resources = await Promise.map(imgs, async img => {
+    note.resources = await Promise.map(imgs, async (img) => {
       const src = decodeURI(img.attribs.src)
       delete img.attribs.src
       img.name = 'en-media'
@@ -400,7 +400,7 @@ export default class Evermark {
       img.attribs.type = imgType // eslint-disable-line
 
       const image = await fileUtils.readFile(path.join(configDir, `${NOTE_PATH}/${src}`), null)
-      img.attribs.hash = this.genHash(image)
+      img.attribs.hash = Evermark.genHash(image)
 
       const resource = new Evernote.Resource()
       resource.mime = 'image/jpg'
@@ -412,7 +412,7 @@ export default class Evermark {
     })
   }
 
-  genHash(data) {
+  static genHash(data) {
     const md5 = crypto.createHash('md5')
     md5.update(data)
     return md5.digest('hex')

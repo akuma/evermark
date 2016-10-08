@@ -14,7 +14,7 @@ const fs = Promise.promisifyAll(fsExtra)
  * Verify that the file or directory is accessible.
  */
 function exists(file) {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     fs.access(file, fs.F_OK, err => resolve(!err))
   })
 }
@@ -70,7 +70,7 @@ function searchFile(filename, dir = `.${path.sep}`) {
   const aDir = dir.endsWith(path.sep) ? dir : `${dir}${path.sep}`
   const currentPath = path.resolve(aDir, filename)
   return exists(currentPath)
-    .then(isExists => {
+    .then((isExists) => {
       if (isExists) {
         return currentPath
       }
@@ -102,7 +102,7 @@ function uniquePath(file) {
 
   return exists(absolutePath)
     .then(exist => (exist ? fs.readdirAsync(dirname) : absolutePath))
-    .then(result => {
+    .then((result) => {
       if (Array.isArray(result) && result.length) {
         let maxSerial = 0
 

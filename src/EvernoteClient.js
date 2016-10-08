@@ -109,7 +109,7 @@ export default class EvernoteClient {
 
   listNotebooks() {
     return this.noteStore.listNotebooksAsync()
-      .catch(e => {
+      .catch((e) => {
         throw wrapError(e)
       })
   }
@@ -118,28 +118,28 @@ export default class EvernoteClient {
     const notebook = new Evernote.Notebook()
     notebook.name = name
     return this.noteStore.createNotebookAsync(notebook)
-      .catch(e => {
+      .catch((e) => {
         throw wrapError(e)
       })
   }
 
   createNote(note) {
     return this.noteStore.createNoteAsync(note)
-      .catch(e => {
+      .catch((e) => {
         throw wrapError(e)
       })
   }
 
   updateNote(note) {
     return this.noteStore.updateNoteAsync(note)
-      .catch(e => {
+      .catch((e) => {
         throw wrapError(e)
       })
   }
 
   expungeNote(guid) {
     return this.noteStore.expungeNoteAsync(guid)
-      .catch(e => {
+      .catch((e) => {
         throw wrapError(e)
       })
   }

@@ -6,13 +6,13 @@ import EvernoteClient, { BAD_DATA_FORMAT, INVALID_AUTH } from '../src/EvernoteCl
 
 const token = 'test'
 
-test('should throw error if token parameter is empty', t => {
+test('should throw error if token parameter is empty', (t) => {
   t.throws(() => new EvernoteClient(), 'Missing developer token')
   t.throws(() => new EvernoteClient({ token: null }), 'Missing developer token')
   t.throws(() => new EvernoteClient({ token: '' }), 'Missing developer token')
 })
 
-test('should create success if token parameter is not empty', t => {
+test('should create success if token parameter is not empty', (t) => {
   let client = new EvernoteClient({ token })
   t.true(client instanceof EvernoteClient)
   let opts = { token, sandbox: false, serviceHost: 'app.yinxiang.com' }
@@ -35,7 +35,7 @@ test('should create success if token parameter is not empty', t => {
   t.deepEqual(client.options, opts)
 })
 
-test('should listNotebooks', async t => {
+test('should listNotebooks', async (t) => {
   const client = new EvernoteClient({ token })
 
   const listNotebooksAsync = sinon.stub(client.noteStore, 'listNotebooksAsync')
@@ -47,7 +47,7 @@ test('should listNotebooks', async t => {
   sinon.assert.calledWith(listNotebooksAsync)
 })
 
-test('should reject if listNotebooks error', t => {
+test('should reject if listNotebooks error', (t) => {
   const client = new EvernoteClient({ token })
 
   const error = new Error()
@@ -76,7 +76,7 @@ test('should createNotebook', async () => {
   sinon.assert.calledWith(createNotebookAsync, notebook)
 })
 
-test('should reject if createNotebook error', t => {
+test('should reject if createNotebook error', (t) => {
   const client = new EvernoteClient({ token })
 
   const error = new Error()
@@ -107,7 +107,7 @@ test('should createNote', async () => {
   sinon.assert.calledWith(createNoteAsync, note)
 })
 
-test('should reject if createNote error', t => {
+test('should reject if createNote error', (t) => {
   const client = new EvernoteClient({ token })
 
   const error = new Error()
@@ -136,7 +136,7 @@ test('should updateNote', async () => {
   sinon.assert.calledWith(updateNoteAsync, note)
 })
 
-test('should reject if updateNote error', t => {
+test('should reject if updateNote error', (t) => {
   const client = new EvernoteClient({ token })
   const note = new Evernote.Note()
 
@@ -176,7 +176,7 @@ test('should expungeNote', async () => {
   sinon.assert.calledWith(expungeNoteAsync, guid)
 })
 
-test('should reject if expungeNote error', async t => {
+test('should reject if expungeNote error', async (t) => {
   const client = new EvernoteClient({ token })
 
   const error = new Error()

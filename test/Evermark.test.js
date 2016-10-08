@@ -23,7 +23,7 @@ test.after(async () => {
   await fileUtils.remove(getTestDir(true))
 })
 
-test('should create local note', async t => {
+test('should create local note', async (t) => {
   const testDir = getTestDir()
   await fileUtils.fs.copyAsync(fixturesDir, testDir)
   const evermark = new Evermark(testDir)
@@ -190,7 +190,7 @@ test('should not create notebook if the notebook exists', async () => {
   clientMock.restore()
 })
 
-test('should unpublish note', async t => {
+test('should unpublish note', async (t) => {
   const testDir = getTestDir()
   await fileUtils.fs.copyAsync(fixturesDir, testDir)
   const evermark = new Evermark(testDir)

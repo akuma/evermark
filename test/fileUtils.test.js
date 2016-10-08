@@ -13,12 +13,12 @@ test.after(async () => {
   await fileUtils.remove(testDir)
 })
 
-test('should exists', async t => {
+test('should exists', async (t) => {
   const exists = await fileUtils.exists(testDir)
   t.false(exists)
 })
 
-test('should ensureDir', async t => {
+test('should ensureDir', async (t) => {
   const dir = path.join(testDir, 'foo/bar')
   let exists = await fileUtils.exists(dir)
   t.false(exists)
@@ -28,7 +28,7 @@ test('should ensureDir', async t => {
   t.true(exists)
 })
 
-test('should ensureFile', async t => {
+test('should ensureFile', async (t) => {
   const file = path.join(testDir, 'foo/a.txt')
   let exists = await fileUtils.exists(file)
   t.false(exists)
@@ -38,7 +38,7 @@ test('should ensureFile', async t => {
   t.true(exists)
 })
 
-test('should remove', async t => {
+test('should remove', async (t) => {
   const file = path.join(testDir, 'foo/b.txt')
   await fileUtils.ensureFile(file)
   let exists = await fileUtils.exists(file)
@@ -49,7 +49,7 @@ test('should remove', async t => {
   t.false(exists)
 })
 
-test('should readFile & writeFile', async t => {
+test('should readFile & writeFile', async (t) => {
   const file = path.join(testDir, 'foo/c.txt')
   let exists = await fileUtils.exists(file)
   t.false(exists)
@@ -65,7 +65,7 @@ test('should readFile & writeFile', async t => {
   t.is(content, new Buffer('测试').toString('base64'))
 })
 
-test('should searchFile', async t => {
+test('should searchFile', async (t) => {
   const filename = 'd.txt'
   const filePath = path.join(testDir, filename)
   await fileUtils.ensureFile(filePath)
@@ -89,7 +89,7 @@ test('should searchFile', async t => {
   t.is(result, null)
 })
 
-test('should get unique file path', async t => {
+test('should get unique file path', async (t) => {
   await Promise.all([
     fileUtils.ensureFile(path.join(testDir, 'e.txt')),
     fileUtils.ensureFile(path.join(testDir, 'e-12.txt')),

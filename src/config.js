@@ -11,7 +11,7 @@ export const APP_CONFIG_NAME = 'evermark.json'
 
 function getConfigPath(workDir = `.${path.sep}`) {
   return fileUtils.searchFile(APP_CONFIG_NAME, workDir)
-    .then(configPath => {
+    .then((configPath) => {
       debug('configPath: %s', configPath)
       if (!configPath) {
         throw new EvermarkError(
@@ -23,7 +23,7 @@ function getConfigPath(workDir = `.${path.sep}`) {
 
 function getDbPath(workDir) {
   return getConfigPath(workDir)
-    .then(configPath => {
+    .then((configPath) => {
       const dbDir = path.dirname(configPath)
       return path.join(dbDir, APP_DB_NAME)
     })
@@ -60,7 +60,7 @@ function getConfig(name, workDir) {
 
 function setConfig(name, value, workDir) {
   return readConfig(workDir)
-    .then(config => {
+    .then((config) => {
       const conf = config
       if (value === 'true') {
         conf[name] = true
@@ -78,7 +78,7 @@ function initConfig(destination = '.') {
   const dest = destination.endsWith(path.sep) ? destination : `${destination}${path.sep}`
   const configPath = `${dest}${APP_CONFIG_NAME}`
   return fileUtils.exists(configPath)
-    .then(exist => {
+    .then((exist) => {
       if (exist) {
         throw new EvermarkError('Current directory does already inited')
       }

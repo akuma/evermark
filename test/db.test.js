@@ -20,19 +20,19 @@ test.after(async () => {
   await fileUtils.remove(testDir)
 })
 
-test('should get db', async t => {
+test('should get db', async (t) => {
   const dbo = await db.get()
   t.true(dbo instanceof Database)
 })
 
-test('should get model', async t => {
+test('should get model', async (t) => {
   const Test = await db.model('Test', {
     name: { type: String, required: true },
   })
   t.true(Test instanceof Model)
 })
 
-test('should save', async t => {
+test('should save', async (t) => {
   const Test = await db.model('Test', {
     name: { type: String, required: true },
   })
