@@ -52,7 +52,7 @@ export default class Evermark {
         if (lang && hljs.getLanguage(lang)) {
           try {
             return `<pre class="hljs"><code>${hljs.highlight(lang, code, true).value}</code></pre>`
-          } catch (e) {
+          } catch (err) {
             // Ignore error
           }
         }
@@ -182,11 +182,13 @@ export default class Evermark {
         const updatedNote = await this.updateNote(note)
         updatedNote.absolutePath = note.absolutePath
         return updatedNote
-      } catch (e) {
-        if (e.code === OBJECT_NOT_FOUND) {
-          delete note.guid
-          isLocalUpdate = true
+      } catch (err) {
+        if (err.code !== OBJECT_NOT_FOUND) {
+          throw err
         }
+
+        delete note.guid
+        isLocalUpdate = true
       }
     }
 
