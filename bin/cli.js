@@ -2,6 +2,7 @@
 /* eslint no-console: 0 */
 /* eslint no-param-reassign: 0 */
 /* eslint global-require: 0 */
+/* eslint import/no-dynamic-require: 0 */
 
 const DEV = process.env.NODE_ENV === 'development'
 if (DEV) {
@@ -83,7 +84,7 @@ const commands = {
   },
 }
 
-Object.keys(commands).forEach(cmd => {
+Object.keys(commands).forEach((cmd) => {
   const command = commands[cmd]
   const prog = program
     .command(command.cmd)
@@ -155,7 +156,7 @@ function exeCmd(fn, spinnerEnable = false) {
     if (spinner) {
       spinner.stop()
     }
-  }).catch(err => {
+  }).catch((err) => {
     if (spinner) {
       spinner.stop()
     }
