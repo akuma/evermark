@@ -207,31 +207,31 @@ This is an inline code: `var example = true`
 
 ## Diagrams
 
-```
-graph LR
-  A-->B
-  B-->C
-  C-->A
-  D-->C
-```
+    ```
+    graph LR
+      A-->B
+      B-->C
+      C-->A
+      D-->C
+    ```
 
-```
-sequenceDiagram
-  Alice->>John: Hello John, how are you?
-  John-->>Alice: Great!
-```
+    ```
+    sequenceDiagram
+      Alice->>John: Hello John, how are you?
+      John-->>Alice: Great!
+    ```
 
-```
-gantt
-  title A Gantt Diagram
+    ```
+    gantt
+      title A Gantt Diagram
 
-  section Section
-  A task           :a1, 2014-01-01, 30d
-  Another task     :after a1  , 20d
-  section Another
-  Task in sec      :2014-01-12  , 12d
-  anther task      : 24d
-```
+      section Section
+      A task           :a1, 2014-01-01, 30d
+      Another task     :after a1  , 20d
+      section Another
+      Task in sec      :2014-01-12  , 12d
+      anther task      : 24d
+    ```
 
 ### Raw HTML
 
