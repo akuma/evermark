@@ -34,8 +34,9 @@ const HIGHLIGHT_THEME_PATH = path.join(__dirname, '../node_modules/highlight.js/
 const DEFAULT_HIGHLIGHT_THEME = 'github'
 
 export default class Evermark {
-  constructor(workDir, options) {
+  constructor(workDir = `.${path.sep}`, options = {}) {
     this.workDir = workDir
+    debug('workDir:', this.workDir)
 
     const md = new MarkdownIt({
       html: true, // Enable HTML tags in source
