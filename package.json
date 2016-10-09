@@ -12,7 +12,7 @@
     "node": ">=5.0"
   },
   "scripts": {
-    "clean": "rimraf build",
+    "clean": "rimraf build lib",
     "build": "npm run clean && babel src -d lib",
     "prepublish": "npm run build",
     "lint": "eslint src/*.js src/**/*.js --quiet --fix",
