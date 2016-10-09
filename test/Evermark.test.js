@@ -65,14 +65,14 @@ test('should create note if the note does not exist', async () => {
   const clientMock = sinon.mock(client)
 
   const note = new Evernote.Note()
-  note.guid = 'a'
+  note.guid = '0'
 
   clientMock.expects('createNote')
     .returns(Promise.resolve(note))
     .once()
   clientMock.expects('updateNote').never()
 
-  const notePath = path.join(testDir, 'notes/a.md')
+  const notePath = path.join(testDir, 'notes/0.md')
   await evermark.publishNote(notePath)
 
   clientMock.verify()
