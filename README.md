@@ -29,8 +29,8 @@
 - [x] 支持发布或撤销某个目录下的所有 Markdown 笔记
 - [x] 支持高亮代码块、图片引用、表格等
 - [x] 支持任务列表
+- [x] 支持数学公式
 - [x] 支持流程图、序列图、甘特图
-- [ ] 支持数学公式
 
 -------------------
 
@@ -236,15 +236,19 @@ This is an inline code: `var example = true`
 
 ### Inline
 
+```
 When $a \ne 0$, there are two solutions to $ax^2 + bx + c = 0$ and they are
 $x = {-b \pm \sqrt {b^2-4ac} \over 2a}$.
+```
 
 ### Block
 
+```
 $$
 \displaystyle \left( \sum_{k=1}^n a_k b_k \right)^2 \leq
 \left( \sum_{k=1}^n a_k^2 \right) \left( \sum_{k=1}^n b_k^2 \right)
 $$
+```
 
 ### Raw HTML
 
