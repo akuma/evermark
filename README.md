@@ -31,7 +31,6 @@
 - [x] 支持任务列表
 - [x] 支持流程图、序列图、甘特图
 - [ ] 支持数学公式
-- [ ] 支持发布多个 Markdown 笔记
 
 -------------------
 
@@ -233,6 +232,20 @@ This is an inline code: `var example = true`
       anther task      : 24d
     ```
 
+## Math Equations
+
+### Inline
+
+When $a \ne 0$, there are two solutions to $ax^2 + bx + c = 0$ and they are
+$x = {-b \pm \sqrt {b^2-4ac} \over 2a}$.
+
+### Block
+
+$$
+\displaystyle \left( \sum_{k=1}^n a_k b_k \right)^2 \leq
+\left( \sum_{k=1}^n a_k^2 \right) \left( \sum_{k=1}^n b_k^2 \right)
+$$
+
 ### Raw HTML
 
 ```
@@ -242,7 +255,7 @@ This is an inline code: `var example = true`
 ### Notebooks & Tags
 
 - **Evermark** 自动使用文档内出现的第一个标题作为笔记标题。
-- **Evermark** 支持 `@(笔记本)[标签 A|标签 B]` 语法, 以选择笔记本和添加标签。
+- **Evermark** 支持 `@(笔记本)[标签A|标签B]` 语法, 以选择笔记本和添加标签。
 
 ## License
 
