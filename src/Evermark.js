@@ -4,15 +4,18 @@ import path from 'path'
 import crypto from 'crypto'
 import Promise from 'bluebird'
 import cheerio from 'cheerio'
-import inlineCss from 'inline-css'
 import hljs from 'highlight.js'
+import inlineCss from 'inline-css'
 import MarkdownIt from 'markdown-it'
-import mdEmoji from 'markdown-it-emoji'
-import mdEnTodo from 'markdown-it-enml-todo'
 import mdSub from 'markdown-it-sub'
 import mdSup from 'markdown-it-sup'
-import mermaidCli from 'mermaid/lib/cli'
+import mdEmoji from 'markdown-it-emoji'
+import mdMathJax from 'markdown-it-mathjax'
+import mdEnmlTodo from 'markdown-it-enml-todo'
 import mermaidLib from 'mermaid/lib'
+import mermaidCli from 'mermaid/lib/cli'
+import mathJax from 'mathjax-node/lib/mj-page'
+import svg2png from 'svg2png'
 import { Evernote } from 'evernote'
 import EvernoteClient, {
   OBJECT_NOT_FOUND,
@@ -27,11 +30,16 @@ import EvermarkError from './EvermarkError'
 const debug = require('debug')('evermark')
 
 const NOTE_PATH = 'notes'
+const NOTE_MATH_PATH = `${NOTE_PATH}/maths`
 const NOTE_DIAGRAM_PATH = `${NOTE_PATH}/diagrams`
 const MARKDOWN_THEME_PATH = path.join(__dirname, '../themes')
 const HIGHLIGHT_THEME_PATH = path.join(__dirname, '../node_modules/highlight.js/styles')
 
 const DEFAULT_HIGHLIGHT_THEME = 'github'
+const MATH_EX_PX_RATIO = 8.27
+
+// Init mathJax api
+mathJax.start()
 
 export default class Evermark {
   constructor(workDir = `.${path.sep}`, options = {}) {
@@ -63,10 +71,11 @@ export default class Evermark {
     })
 
     // Use some plugins
-    md.use(mdEmoji)
-      .use(mdEnTodo)
-      .use(mdSub)
+    md.use(mdSub)
       .use(mdSup)
+      .use(mdEmoji)
+      .use(mdMathJax)
+      .use(mdEnmlTodo)
 
     // Add inline code class
     const inlineCodeRule = md.renderer.rules.code_inline
@@ -311,57 +320,31 @@ export default class Evermark {
   }
 
   async generateHtml(note, tokens) {
-    let markedHtml = this.md.renderer.render(tokens, this.md.options)
+    const markedHtml = this.md.renderer.render(tokens, this.md.options)
     debug('markedHtml: %s', markedHtml)
 
-    // Generate mermaid diagrams
-    markedHtml = await this.genMermaidImages(markedHtml)
-
-    // Get highlight theme from configuration
-    const conf = await this.getConfig()
-    const highlightTheme = conf.highlight || DEFAULT_HIGHLIGHT_THEME
-
-    // Html with styles
-    const styles = await Promise.all([
-      fileUtils.readFile(path.join(MARKDOWN_THEME_PATH, 'github.css')),
-      fileUtils.readFile(path.join(HIGHLIGHT_THEME_PATH, `${highlightTheme}.css`)),
-    ])
-    const styleHtml = `<style>${styles[0]}${styles[1]}</style>` +
-      `<div class="markdown-body">${markedHtml}</div>`
-    debug('styleHtml: %s', styleHtml)
-
-    // Change html classes to inline styles
-    const inlineStyleHtml = await inlineCss(styleHtml, {
-      url: '/',
-      removeStyleTags: true,
-      removeHtmlSelectors: true,
-    })
-
-    const $ = cheerio.load(inlineStyleHtml)
-    $('en-todo').removeAttr('style')
-    await this.attchResources(note, $)
+    const $ = cheerio.load(markedHtml)
+    await this.processDiagrams($)
+    const mathStyles = await this.processMathEquations($)
+    await this.processStyles($, mathStyles)
+    await this.attchResources($, note)
 
     // ENML is a superset of XHTML, so change html to xhtml
-    const inlineStyleXhtml = $.xml()
-    debug('inlineStyleXhtml: %s', inlineStyleXhtml)
-    return inlineStyleXhtml
+    const finalXhtml = $.xml()
+    debug('finalXhtml: %s', finalXhtml)
+    return finalXhtml
   }
 
-  async genMermaidImages(markedHtml) {
-    const $ = cheerio.load(markedHtml)
-
-    const mermaidCodes = []
-    $('.mermaid').each((index, element) => {
-      mermaidCodes.push($(element).text())
+  async processDiagrams($) {
+    const mermaids = []
+    const $mermaids = $('.mermaid')
+    $mermaids.each((i, e) => {
+      mermaids.push($(e).text())
     })
 
-    if (!mermaidCodes.length) {
-      return $.html()
-    }
-
-    const mmdImgs = await Promise.map(mermaidCodes, async (code) => {
-      const mmdFile = path.join(this.workDir, NOTE_DIAGRAM_PATH, `${Evermark.genHash(code)}.mmd`)
-      await fileUtils.writeFile(mmdFile, code)
+    const mmdImgs = await Promise.map(mermaids, async (mermaid) => {
+      const mmdFile = path.join(this.workDir, NOTE_DIAGRAM_PATH, `${Evermark.genHash(mermaid)}.mmd`)
+      await fileUtils.writeFile(mmdFile, mermaid)
       await new Promise((resolve, reject) => {
         mermaidCli.parse(['-p', '-o', path.join(this.workDir, NOTE_DIAGRAM_PATH), mmdFile],
           (err, message, options) => {
@@ -379,17 +362,92 @@ export default class Evermark {
     })
     debug('mermaid images:', mmdImgs)
 
-    // Replace mermaid code with mermaid diagram
-    $('.mermaid').each((index, element) => {
-      $(element).replaceWith(`<img src="${mmdImgs[index]}" alt="mermaid diagram">`)
+    // Replace mermaid codes with mermaid diagrams
+    $mermaids.each((i, e) => {
+      $(e).replaceWith(`<img src="${mmdImgs[i]}" alt="mermaid diagram">`)
     })
-
-    const result = $.html()
-    debug('mermaided html:', result)
-    return result
   }
 
-  async attchResources(note, $) {
+  async processMathEquations($) {
+    const html = await new Promise((resolve, reject) => {
+      mathJax.typeset({
+        html: $.html(),
+        renderer: 'SVG',
+      }, (result) => {
+        if (result.errors) {
+          reject(result.errors)
+        } else {
+          resolve(result.html)
+        }
+      })
+    })
+    $.root().html(html)
+
+    const $mathStyles = $('#MathJax_SVG_styles')
+    const $mathSvgDefs = $('#MathJax_SVG_glyphs').parent()
+    const mathStyles = $mathStyles.text()
+    const mathSvgGlyphs = $mathSvgDefs.html()
+    $mathStyles.remove()
+    $mathSvgDefs.remove()
+
+    const mathSvgs = []
+    const $svgs = $('svg')
+    $svgs.each((i, e) => {
+      mathSvgs.push({
+        data: $(e).prepend(mathSvgGlyphs).parent().html(),
+        width: parseInt($(e).attr('width'), 10) * MATH_EX_PX_RATIO,
+        height: parseInt($(e).attr('height'), 10) * MATH_EX_PX_RATIO,
+      })
+    })
+
+    const mathImgs = await Promise.map(mathSvgs, async (svg) => {
+      const img = path.join(this.workDir, NOTE_MATH_PATH, `${Evermark.genHash(svg.data)}.png`)
+      await svg2png(Buffer.from(svg.data), { width: svg.width * 2, height: svg.height * 2 })
+        .then(buffer => fileUtils.writeFile(img, buffer))
+      return {
+        src: `${img.slice(path.join(this.workDir, NOTE_PATH).length + 1)}`,
+        width: svg.width,
+        height: svg.height,
+      }
+    })
+    debug('mathImgs:', mathImgs)
+
+    // Replace math svgs with math images
+    $svgs.each((i, e) => {
+      $(e).replaceWith(`<img src="${mathImgs[i].src}" alt="math equation"` +
+        `width="${mathImgs[i].width}" height="${mathImgs[i].height}">`)
+    })
+
+    return mathStyles
+  }
+
+  async processStyles($, mathStyles) {
+    // Get highlight theme from configuration
+    const conf = await this.getConfig()
+    const highlightTheme = conf.highlight || DEFAULT_HIGHLIGHT_THEME
+
+    // Process html styles
+    const styles = await Promise.all([
+      mathStyles,
+      fileUtils.readFile(path.join(MARKDOWN_THEME_PATH, 'github.css')),
+      fileUtils.readFile(path.join(HIGHLIGHT_THEME_PATH, `${highlightTheme}.css`)),
+    ])
+    const styleHtml = `<style>${styles.join('')}</style>` +
+      `<div class="markdown-body">${$.html()}</div>`
+    debug('styleHtml: %s', styleHtml)
+    $.root().html(styleHtml)
+
+    // Change html classes to inline styles
+    const inlineStyleHtml = await inlineCss($.html(), {
+      url: '/',
+      removeStyleTags: true,
+      removeHtmlSelectors: true,
+    })
+    $.root().html(inlineStyleHtml)
+    $('en-todo').removeAttr('style')
+  }
+
+  async attchResources($, note) {
     const configDir = await this.getConfigDir()
 
     const imgs = $('img').toArray().filter(img => !/^.+:\/\//.test(img.attribs.src))
