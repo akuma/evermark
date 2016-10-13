@@ -9,7 +9,7 @@
     "evermark": "bin/cli.js"
   },
   "engines": {
-    "node": ">=5.0"
+    "node": ">=6.0"
   },
   "scripts": {
     "clean": "rimraf build lib",
