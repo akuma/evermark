@@ -12,6 +12,7 @@ require('babel-polyfill')
 
 const os = require('os')
 const path = require('path')
+const readline = require('readline')
 const co = require('co')
 const ora = require('ora')
 const chalk = require('chalk')
@@ -21,6 +22,10 @@ const pkg = require('../package.json')
 const fileUtils = require(DEV ? '../src/fileUtils' : '../lib/fileUtils').default
 const { Evermark, config } = require(DEV ? '../src' : '../lib')
 
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+})
 const fs = fileUtils.fs
 const magenta = chalk.magenta
 
@@ -173,7 +178,14 @@ function exeCmd(fn, spinnerEnable = false) {
 
 function init(destination) {
   exeCmd(function* fn() {
+    const isChina = yield new Promise((resolve) => {
+      rl.question('Do you use (E)vernote or (Y)inxiang Biji? [E]/Y', (answer) => {
+        rl.close()
+        resolve(/y|Y/.test(answer))
+      })
+    })
     yield config.initConfig(destination)
+    yield config.setConfig('china', isChina)
     info('Evermark folder has been initialized.\n      ' +
         'Update the token in "evermark.json" then you can add some notes.')
   })
