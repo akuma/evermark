@@ -74,7 +74,7 @@ function setConfig(name, value, workDir) {
     .spread((configPath, config) => saveConfig(configPath, config))
 }
 
-function initConfig(destination = '.') {
+function initConfig(destination = '.', settings = {}) {
   const dest = destination.endsWith(path.sep) ? destination : `${destination}${path.sep}`
   const configPath = `${dest}${APP_CONFIG_NAME}`
   return fileUtils.exists(configPath)
@@ -88,6 +88,7 @@ function initConfig(destination = '.') {
         china: true,
         sandbox: false,
         highlight: 'github',
+        ...settings,
       }
       return saveConfig(configPath, config)
     })
