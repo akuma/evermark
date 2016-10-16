@@ -44,11 +44,15 @@ npm install -g evermark
 
 ### 初始化 Evermark 文件夹
 
-执行完后需要修改该目录下的 `evermark.json`，填写你的 `developerToken`。
+初始化 Evermark 文件夹，保存配置信息到 `evermark.json` 文件。
 
 ```bash
 evermark init <destination>
 ```
+
+1. 首先根据提示选择你使用的是 Evernote International 还是印象笔记；
+2. 然后在自动打开的网页里输入账号密码后生成 `developerToken` 并复制；
+3. 最后根据提示粘贴刚刚复制的 `developerToken`。
 
 `developerToken` 的生成链接：
 
