@@ -14,6 +14,7 @@ const os = require('os')
 const path = require('path')
 const readline = require('readline')
 const co = require('co')
+const opn = require('opn')
 const ora = require('ora')
 const chalk = require('chalk')
 const program = require('commander')
@@ -22,10 +23,9 @@ const pkg = require('../package.json')
 const fileUtils = require(DEV ? '../src/fileUtils' : '../lib/fileUtils').default
 const { Evermark, config } = require(DEV ? '../src' : '../lib')
 
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout,
-})
+const DEV_TOKEN_URL_YINXIANG = 'https://app.yinxiang.com/api/DeveloperToken.action'
+const DEV_TOKEN_URL_EVERNOTE = 'https://www.evernote.com/api/DeveloperToken.action'
+
 const fs = fileUtils.fs
 const magenta = chalk.magenta
 
@@ -178,16 +178,37 @@ function exeCmd(fn, spinnerEnable = false) {
 
 function init(destination) {
   exeCmd(function* fn() {
-    const isChina = yield new Promise((resolve) => {
-      rl.question('Do you use (E)vernote or (Y)inxiang Biji? [E]/Y', (answer) => {
-        rl.close()
+    const rl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout,
+    })
+
+    const china = yield new Promise((resolve) => {
+      rl.question('Do you use (E)vernote International or (Y)inxiang Biji? [E]/Y ', (answer) => {
+        rl.pause()
         resolve(/y|Y/.test(answer))
       })
     })
-    yield config.initConfig(destination)
-    yield config.setConfig('china', isChina)
-    info('Evermark folder has been initialized.\n      ' +
-        'Update the token in "evermark.json" then you can add some notes.')
+
+    const devTokenUrl = china ? DEV_TOKEN_URL_YINXIANG : DEV_TOKEN_URL_EVERNOTE
+    yield opn(devTokenUrl, { wait: false })
+
+    let token = null
+    while (!token || !token.trim()) {
+      token = yield new Promise((resolve) => {
+        const appName = china ? 'Yinxiang Biji' : 'Evernote International'
+        rl.question(`Please input your ${appName} developer token:\n`,
+          (answer) => {
+            rl.close()
+            resolve(answer)
+          }
+        )
+      })
+    }
+
+    yield config.initConfig(destination, { token, china })
+
+    info('Evermark folder has been initialized.')
   })
 }
 

@@ -53,6 +53,7 @@
     "markdown-it-sup": "^1.0.0",
     "mathjax-node": "^0.5.1",
     "mermaid": "^6.0.0",
+    "opn": "^4.0.2",
     "ora": "^0.3.0",
     "phantomjs": "^2.1.7",
     "svg2png": "^4.0.0",
