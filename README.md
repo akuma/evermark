@@ -22,7 +22,7 @@
 
 > A command line tool for syncing markdown files to Evernote :elephant:
 
-**Evermark** 是一款基于 Evernote 的 Markdown 笔记命令行工具，简单实用。
+**Evermark** 是一个支持将 Markdown 笔记发布到 Evernote 的命令行工具。
 
 - [x] 支持基于命令行添加、发布 Markdown 格式的笔记
 - [x] 支持自动添加在笔记内容中指定的笔记本和标签
