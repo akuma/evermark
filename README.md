@@ -20,82 +20,81 @@
 [david-dev-image]: https://david-dm.org/akuma/evermark/dev-status.svg
 [david-dev-url]: https://david-dm.org/akuma/evermark#info=devDependencies
 
-> A command line tool for syncing markdown files to Evernote :elephant:
+> A command line tool for syncing markdown notes to Evernote :elephant:
 
-**Evermark** 是一个支持将 Markdown 笔记发布到 Evernote 的命令行工具。
+Some features:
 
-- [x] 支持基于命令行添加、发布 Markdown 格式的笔记
-- [x] 支持自动添加在笔记内容中指定的笔记本和标签
-- [x] 支持发布或撤销某个目录下的所有 Markdown 笔记
-- [x] 支持高亮代码块、图片引用、表格等
-- [x] 支持任务列表
-- [x] 支持数学公式
-- [x] 支持流程图、序列图、甘特图
+- [x] Supports publishing markdown notes to evernote
+- [x] Supports unpublishing markdown notes from evernote
+- [x] Supports adding notebook and tags
+- [x] Supports code highlight, tables and inserting images
+- [x] Supports todo-list and LaTeX expressions
+- [x] Supports flow charts, sequence diagrams and gant diagrams
 
 -------------------
 
-## 安装方法
+## Install
 
 ```bash
 npm install -g evermark
 ```
 
-## 命令说明
+## Commands
 
-### 初始化 Evermark 文件夹
+### Initialize Evermark Folder
 
-初始化 Evermark 文件夹，保存配置信息到 `evermark.json` 文件。
+Initialize **Evermark** folder, save settings to file `evermark.json`。
 
 ```bash
 evermark init <destination>
 ```
 
-1. 首先根据提示选择你使用的是 Evernote International 还是印象笔记；
-2. 然后在自动打开的网页里输入账号密码后生成 `developerToken` 并复制；
-3. 最后根据提示粘贴刚刚复制的 `developerToken`。
+1. First, follow the prompt to select whether you are using Evernote International or 印象笔记.
+1. Then login with your account from automatically opened page to generate `developerToken` and copy it.
+1. Finally, according to the prompt paste the copied `developerToken`.
 
-`developerToken` 的生成链接：
+The urls to generate `developerToken`:
 
 - [Evernote International](https://www.evernote.com/api/DeveloperToken.action)
 - [印象笔记](https://app.yinxiang.com/api/DeveloperToken.action)
 
-### 查看或修改配置
+### View or Modify the Configuration
 
 ```bash
 evermark config [name] [value]
 ```
 
-### 添加笔记文件
+### Add Note
 
-创建一个 markdown 文件，存放在 Evermark 文件夹的 `notes` 目录下。
+Create a empty markdown note in the `notes` directory of the ** Evermark ** folder.
 
 ```bash
 evermark new <title>
 ```
 
-### 发布笔记
+### Publish Notes
 
-将 markdown 文件发布到 Evernote，对于已发布过的文件会采取更新操作。
+Publish markdown notes to Evernote or update the published notes.
 
 ```bash
 evermark publish <file_or_directory>
 ```
 
-### 撤销笔记
+### Unpublish Notes
 
-在 Evernote 中删除 markdown 文件对应的笔记，markdown 文件不会删除。
+Delete the Evernote note which corresponding the markdown note, but the markdown note will not be deleted.
 
 ```bash
 evermark unpublish <file_or_directory>
 ```
 
-### 查看帮助
+### View Help
 
 ```bash
 evermark help [command]
 ```
 
-## Evermark 支持的 Markdown 语法
+## The Supported Markdown Syntax
 
 ### Headers
 
@@ -208,7 +207,10 @@ This is an inline code: `var example = true`
     console.log('Hello world!')
     ```
 
-## Diagrams
+### Diagrams
+
+**Evermark** supports flow charts, sequence diagrams and gant diagrams by using [mermaid](https://github.com/knsv/mermaid).<br>
+Please see the [mermaid docs](http://knsv.github.io/mermaid/) for more details.
 
     ```
     graph LR
@@ -236,16 +238,18 @@ This is an inline code: `var example = true`
       anther task      : 24d
     ```
 
-## Math Equations
+### Math Equations
 
-### Inline
+**Evermark** supports LaTeX expression for math.
+
+#### Inline
 
 ```
 When $a \ne 0$, there are two solutions to $ax^2 + bx + c = 0$ and they are
 $x = {-b \pm \sqrt {b^2-4ac} \over 2a}$.
 ```
 
-### Block
+#### Block
 
 ```
 $$
@@ -260,10 +264,15 @@ $$
 <div style="color: red;">This is a <strong>html</strong> code.</div>
 ```
 
-### Notebooks & Tags
+### Others
 
-- **Evermark** 自动使用文档内出现的第一个标题作为笔记标题。
-- **Evermark** 支持 `@(笔记本)[标签A|标签B]` 语法, 以选择笔记本和添加标签。
+#### Notebooks & Tags
+
+**Evermark** add @(Notebook)[tag1|tag2|tag3] syntax to select notebook and set tags for the note.
+
+#### Title
+
+**Evermark** would use the first heading encountered as the note title.
 
 ## License
 
