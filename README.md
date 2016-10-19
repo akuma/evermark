@@ -66,7 +66,7 @@ evermark config [name] [value]
 
 ### Add Note
 
-Create a empty markdown note in the `notes` directory of the ** Evermark ** folder.
+Create a empty markdown note in the `notes` directory of the **Evermark** folder.
 
 ```bash
 evermark new <title>
