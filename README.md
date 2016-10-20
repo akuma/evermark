@@ -222,7 +222,7 @@ Please see the [mermaid docs](http://knsv.github.io/mermaid/) for more details.
         C --> D
     ```
 
-![Flow Diagram](media/flow-diagram.png "Flow Diagram")
+<img src="media/flow-diagram.png" alt="Flow Diagram" width="414">
 
 #### Sequence Diagrams
 
@@ -240,7 +240,7 @@ Please see the [mermaid docs](http://knsv.github.io/mermaid/) for more details.
         Bob-->>John: Jolly good!
     ```
 
-![Sequence Diagram](media/sequence-diagram.png "Sequence Diagram")
+<img src="media/sequence-diagram.png" alt="Sequence Diagram" width="421">
 
 #### Gantt Diagrams
 
@@ -257,7 +257,7 @@ Please see the [mermaid docs](http://knsv.github.io/mermaid/) for more details.
         anther task      : 24d
     ```
 
-![Gantt Diagram](media/gantt-diagram.png "Gantt Diagram")
+<img src="media/gantt-diagram.png" alt="Gantt Diagram" width="555">
 
 ### Math Equations
 
@@ -270,7 +270,7 @@ When $a \ne 0$, there are two solutions to $ax^2 + bx + c = 0$ and they are
 $x = {-b \pm \sqrt {b^2-4ac} \over 2a}$.
 ```
 
-![Inline Math Equations](media/inline-math-equations.png "Inline Math Equations")
+<img src="media/inline-math-equations.png" alt="Inline Math Equations" width="659">
 
 #### Block Equations
 
@@ -285,7 +285,7 @@ $$
 $$
 ```
 
-![Block Math Equations](media/block-math-equations.png "Block Math Equations")
+<img src="media/block-math-equations.png" alt="Block Math Equations" width="270">
 
 ### Raw HTML
 
