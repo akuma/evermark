@@ -212,51 +212,80 @@ This is an inline code: `var example = true`
 **Evermark** supports flow charts, sequence diagrams and gant diagrams by using [mermaid](https://github.com/knsv/mermaid).<br>
 Please see the [mermaid docs](http://knsv.github.io/mermaid/) for more details.
 
+#### Flow Diagrams
+
     ```
     graph LR
-      A-->B
-      B-->C
-      C-->A
-      D-->C
+        A[Square Rect] -- Link text --> B((Circle))
+        A --> C(Round Rect)
+        B --> D{Rhombus}
+        C --> D
     ```
+
+![Flow Diagram](media/flow-diagram.png "Flow Diagram")
+
+#### Sequence Diagrams
 
     ```
     sequenceDiagram
-      Alice->>John: Hello John, how are you?
-      John-->>Alice: Great!
+        participant Alice
+        participant Bob
+        Alice->>John: Hello John, how are you?
+        loop Healthcheck
+            John->>John: Fight against hypochondria
+        end
+        Note right of John: Rational thoughts<br/>prevail...
+        John-->>Alice: Great!
+        John->>Bob: How about you?
+        Bob-->>John: Jolly good!
     ```
+
+![Sequence Diagram](media/sequence-diagram.png "Sequence Diagram")
+
+#### Gantt Diagrams
 
     ```
     gantt
-      title A Gantt Diagram
+        title A Gantt Diagram
 
-      section Section
-      A task           :a1, 2014-01-01, 30d
-      Another task     :after a1  , 20d
-      section Another
-      Task in sec      :2014-01-12  , 12d
-      anther task      : 24d
+        section Section
+        A task           :a1, 2014-01-01, 30d
+        Another task     :after a1  , 20d
+
+        section Another
+        Task in sec      :2014-01-12, 12d
+        anther task      : 24d
     ```
+
+![Gantt Diagram](media/gantt-diagram.png "Gantt Diagram")
 
 ### Math Equations
 
 **Evermark** supports LaTeX expression for math.
 
-#### Inline
+#### Inline Equations
 
 ```
 When $a \ne 0$, there are two solutions to $ax^2 + bx + c = 0$ and they are
 $x = {-b \pm \sqrt {b^2-4ac} \over 2a}$.
 ```
 
-#### Block
+![Inline Math Equations](media/inline-math-equations.png "Inline Math Equations")
+
+#### Block Equations
 
 ```
+$$
+\displaystyle \frac{1}{\Bigl(\sqrt{\phi \sqrt{5}}-\phi\Bigr) e^{\frac25 \pi}} = 1+\frac{e^{-2\pi}} {1+\frac{e^{-4\pi}} {1+\frac{e^{-6\pi}} {1+\frac{e^{-8\pi}} {1+\cdots} } } }
+$$
+
 $$
 \displaystyle \left( \sum_{k=1}^n a_k b_k \right)^2 \leq
 \left( \sum_{k=1}^n a_k^2 \right) \left( \sum_{k=1}^n b_k^2 \right)
 $$
 ```
+
+![Block Math Equations](media/block-math-equations.png "Block Math Equations")
 
 ### Raw HTML
 
@@ -264,7 +293,7 @@ $$
 <div style="color: red;">This is a <strong>html</strong> code.</div>
 ```
 
-### Others
+### Other Syntax
 
 #### Notebooks & Tags
 
