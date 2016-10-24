@@ -22,6 +22,8 @@
 
 > 将 markdown 笔记同步到 Evernote 的命令行工具 :elephant:
 
+[English](README.md) [中文](README_zh.md)
+
 一些功能特性：
 
 - [x] 支持发布 markdown 笔记到 evernote
