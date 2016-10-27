@@ -21,7 +21,7 @@ const program = require('commander')
 const pkg = require('../package.json')
 
 const fileUtils = require(DEV ? '../src/fileUtils' : '../lib/fileUtils').default
-const { Evermark, config } = require(DEV ? '../src' : '../lib')
+const { Evermark, EvermarkError, config } = require(DEV ? '../src' : '../lib')
 
 const DEV_TOKEN_URL_YINXIANG = 'https://app.yinxiang.com/api/DeveloperToken.action'
 const DEV_TOKEN_URL_EVERNOTE = 'https://www.evernote.com/api/DeveloperToken.action'
@@ -102,7 +102,7 @@ Object.keys(commands).forEach((cmd) => {
 
 program.parse(process.argv)
 
-if (process.argv.length === 2) {
+if (program.args.length === 0) {
   program.help()
 }
 
@@ -243,8 +243,8 @@ function publishNote(fileOrDir) {
   exeCmd(function* fn() {
     const evermark = new Evermark()
 
-    const isDirectory = (yield fs.statAsync(fileOrDir)).isDirectory()
-    if (isDirectory) {
+    const isDir = yield isDirectory(fileOrDir)
+    if (isDir) {
       const files = (yield fs.readdirAsync(fileOrDir))
         .filter(f => f.endsWith('.md'))
         .map(f => path.join(fileOrDir, f))
@@ -263,8 +263,8 @@ function unpublish(fileOrDir) {
   exeCmd(function* fn() {
     const evermark = new Evermark()
 
-    const isDirectory = (yield fs.statAsync(fileOrDir)).isDirectory()
-    if (isDirectory) {
+    const isDir = yield isDirectory(fileOrDir)
+    if (isDir) {
       const files = (yield fs.readdirAsync(fileOrDir))
         .filter(f => f.endsWith('.md'))
         .map(f => path.join(fileOrDir, f))
@@ -277,4 +277,16 @@ function unpublish(fileOrDir) {
       info(`Unpublished note: ${tildify(notePath)}`)
     }
   }, true)
+}
+
+function* isDirectory(fileOrDir) {
+  let isDir = false
+  try {
+    isDir = (yield fs.statAsync(fileOrDir)).isDirectory()
+  } catch (err) {
+    if (err.code === 'ENOENT') {
+      throw new EvermarkError(`${fileOrDir} does not exist`)
+    }
+  }
+  return isDir
 }
