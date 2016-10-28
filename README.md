@@ -22,6 +22,8 @@
 
 > A command line tool for syncing markdown notes to Evernote :elephant:
 
+[English](README.md) [中文](README_zh.md)
+
 Some features:
 
 - [x] Supports publishing markdown notes to evernote
