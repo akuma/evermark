@@ -84,7 +84,7 @@ evermark publish <file_or_directory>
 
 ### Unpublish Notes
 
-Delete the Evernote note which corresponding the markdown note, but the markdown note will not be deleted.
+Delete the Evernote note which corresponding the markdown note, but the markdown note file will not be deleted.
 
 ```bash
 evermark unpublish <file_or_directory>
