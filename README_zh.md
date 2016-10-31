@@ -263,7 +263,7 @@ This is an inline code: `var example = true`
 
 ### 数学公式
 
-**Evermark** supports LaTeX expression for math.
+**Evermark** 使用 LaTeX 语法来写数学公式。
 
 #### 行内公式
 
