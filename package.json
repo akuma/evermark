@@ -48,7 +48,7 @@
     "markdown-it": "^8.0.0",
     "markdown-it-emoji": "^1.3.0",
     "markdown-it-enml-todo": "^1.0.2",
-    "markdown-it-mathjax": "^1.0.3",
+    "markdown-it-mathjax": "^2.0.0",
     "markdown-it-sub": "^1.0.0",
     "markdown-it-sup": "^1.0.0",
     "mathjax-node": "^0.5.1",
