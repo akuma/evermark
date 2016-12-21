@@ -40,7 +40,7 @@
     "cheerio": "^0.22.0",
     "co": "^4.6.0",
     "commander": "^2.9.0",
-    "debug": "^2.2.0",
+    "debug": "^2.5.0",
     "evernote": "^1.25.82",
     "fs-extra": "^1.0.0",
     "highlight.js": "^9.8.0",
