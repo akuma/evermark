@@ -52,7 +52,7 @@
     "markdown-it-sub": "^1.0.0",
     "markdown-it-sup": "^1.0.0",
     "mathjax-node": "^0.5.1",
-    "mermaid": "^6.0.0",
+    "mermaid": "^7.0.0",
     "opn": "^4.0.2",
     "ora": "^1.0.0",
     "phantomjs": "^2.1.7",
