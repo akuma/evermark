@@ -42,7 +42,7 @@
     "commander": "^2.9.0",
     "debug": "^2.5.0",
     "evernote": "^1.25.82",
-    "fs-extra": "^2.0.0",
+    "fs-extra": "^3.0.0",
     "highlight.js": "^9.9.0",
     "inline-css": "^2.2.2",
     "markdown-it": "^8.0.0",
