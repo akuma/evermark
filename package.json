@@ -51,7 +51,7 @@
     "markdown-it-mathjax": "^2.0.0",
     "markdown-it-sub": "^1.0.0",
     "markdown-it-sup": "^1.0.0",
-    "mathjax-node": "^0.5.1",
+    "mathjax-node": "^1.1.0",
     "mermaid": "^7.0.0",
     "opn": "^5.0.0",
     "ora": "^1.0.0",
@@ -60,7 +60,7 @@
     "warehouse": "^2.2.0"
   },
   "devDependencies": {
-    "ava": "^0.18.0",
+    "ava": "^0.19.1",
     "babel-cli": "^6.16.0",
     "babel-eslint": "^7.0.0",
     "babel-preset-latest": "^6.16.0",
