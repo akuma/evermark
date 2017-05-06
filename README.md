@@ -1,5 +1,7 @@
 # Evermark
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/akuma/evermark.svg)](https://greenkeeper.io/)
+
 [![NPM version][npm-image]][npm-url]
 [![Build Status][build-image]][build-url]
 [![Windows Build Status][build-image-win]][build-url-win]
