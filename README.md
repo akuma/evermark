@@ -306,6 +306,19 @@ $$
 
 **Evermark** would use the first heading encountered as the note title.
 
+## 贡献和讨论
+
+欢迎提交 issue 来优化完善这个项目。
+
+如果此项目对您有很大的帮助, 请酌情考虑打赏作者。
+
+<table>
+  <tr style="border:0">
+    <td style="border:0"><img src="media/wechat.jpg" alt="微信赞赏" width="200"></td>
+    <td style="border:0"><img src="media/alipay.jpg" alt="支付宝赞赏" width="200"></td>
+  </tr>
+</table>
+
 ## License
 
 [MIT](LICENSE)
