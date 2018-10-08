@@ -1,12 +1,10 @@
-import path from 'path'
-import test from 'ava'
-import sinon from 'sinon'
-import Promise from 'bluebird'
-import { Evernote } from 'evernote'
-import { OBJECT_NOT_FOUND } from '../src/EvernoteClient'
-import Evermark from '../src/Evermark'
-import fileUtils from '../src/fileUtils'
-import utils from './helpers/utils'
+const path = require('path')
+const test = require('ava')
+const sinon = require('sinon')
+const { Evernote, OBJECT_NOT_FOUND } = require('../src/EvernoteClient')
+const Evermark = require('../src/Evermark')
+const fileUtils = require('../src/fileUtils')
+const utils = require('./helpers/utils')
 
 const fixturesDir = path.join(__dirname, 'fixtures')
 
@@ -23,9 +21,9 @@ test.after(async () => {
   await fileUtils.remove(getTestDir(true))
 })
 
-test('should create local note', async (t) => {
+test('should create local note', async t => {
   const testDir = getTestDir()
-  await fileUtils.fs.copyAsync(fixturesDir, testDir)
+  await fileUtils.copy(fixturesDir, testDir)
   const evermark = new Evermark(testDir)
 
   let title = 'test'
@@ -56,149 +54,165 @@ test('should create local note', async (t) => {
   t.is(noteContent, `# ${title}\n`)
 })
 
-test('should create note if the note does not exist', async () => {
+test('should create note if the note does not exist', async t => {
   const testDir = getTestDir()
-  await fileUtils.fs.copyAsync(fixturesDir, testDir)
+  await fileUtils.copy(fixturesDir, testDir)
   const evermark = new Evermark(testDir)
 
   const client = await evermark.getEvernoteClient()
   const clientMock = sinon.mock(client)
 
-  const note = new Evernote.Note()
+  const note = new Evernote.Types.Note()
   note.guid = '0'
 
-  clientMock.expects('createNote')
+  clientMock
+    .expects('createNote')
     .returns(Promise.resolve(note))
     .once()
   clientMock.expects('updateNote').never()
 
   const notePath = path.join(testDir, 'notes/0.md')
-  await evermark.publishNote(notePath)
+  const note2 = await evermark.publishNote(notePath)
+  t.is(note2.guid, note.guid)
 
   clientMock.verify()
   clientMock.restore()
 })
 
-test('should update note if the note exists', async () => {
+test('should update note if the note exists', async t => {
   const testDir = getTestDir()
-  await fileUtils.fs.copyAsync(fixturesDir, testDir)
+  await fileUtils.copy(fixturesDir, testDir)
   const evermark = new Evermark(testDir)
 
   const client = await evermark.getEvernoteClient()
   const clientMock = sinon.mock(client)
 
-  const note = new Evernote.Note()
+  const note = new Evernote.Types.Note()
   note.guid = 'a'
 
-  clientMock.expects('createNote')
+  clientMock
+    .expects('createNote')
     .returns(Promise.resolve(note))
     .once()
-  clientMock.expects('updateNote')
+  clientMock
+    .expects('updateNote')
     .returns(Promise.resolve(note))
     .once()
 
   const notePath = path.join(testDir, 'notes/a.md')
-  await evermark.publishNote(notePath)
-  await evermark.publishNote(notePath)
+  const note1 = await evermark.publishNote(notePath)
+  const note2 = await evermark.publishNote(notePath)
+  t.is(note1.guid, note.guid)
+  t.is(note2.guid, note.guid)
 
   clientMock.verify()
   clientMock.restore()
 })
 
-test('should create note if the note which to update does not exist', async () => {
+test('should create note if the note which to update does not exist', async t => {
   const testDir = getTestDir()
-  await fileUtils.fs.copyAsync(fixturesDir, testDir)
+  await fileUtils.copy(fixturesDir, testDir)
   const evermark = new Evermark(testDir)
 
   const client = await evermark.getEvernoteClient()
   const clientMock = sinon.mock(client)
 
-  const note = new Evernote.Note()
+  const note = new Evernote.Types.Note()
   note.guid = 'b'
 
   const error = new Error()
   error.code = OBJECT_NOT_FOUND
   error.message = 'Evernote API Error: OBJECT_NOT_FOUND\n\nObject not found by identifier Note.guid'
 
-  clientMock.expects('updateNote')
+  clientMock
+    .expects('updateNote')
     .returns(Promise.reject(error))
     .once()
-  clientMock.expects('createNote')
+  clientMock
+    .expects('createNote')
     .returns(Promise.resolve(note))
     .once()
   const notePath = path.join(testDir, 'notes/b.md')
-  await evermark.publishNote(notePath)
+  const note2 = await evermark.publishNote(notePath)
+  t.is(note2.guid, note.guid)
 
   clientMock.verify()
   clientMock.restore()
 })
 
-test('should create notebook if the notebook does not exist', async () => {
+test('should create notebook if the notebook does not exist', async t => {
   const testDir = getTestDir()
-  await fileUtils.fs.copyAsync(fixturesDir, testDir)
+  await fileUtils.copy(fixturesDir, testDir)
   const evermark = new Evermark(testDir)
 
   const client = await evermark.getEvernoteClient()
   const clientMock = sinon.mock(client)
 
   const notebookName = 'foo'
-  const note = new Evernote.Note()
+  const note = new Evernote.Types.Note()
   note.guid = 'c'
 
-  clientMock.expects('createNote')
+  clientMock
+    .expects('createNote')
     .returns(Promise.resolve(note))
     .once()
-  clientMock.expects('listNotebooks')
+  clientMock
+    .expects('listNotebooks')
     .returns(Promise.resolve([]))
     .once()
-  clientMock.expects('createNotebook')
+  clientMock
+    .expects('createNotebook')
     .withArgs(notebookName)
     .returns(Promise.resolve([{ guid: 'foo', name: notebookName }]))
     .once()
 
   const notePath = path.join(testDir, 'notes/c.md')
-  await evermark.publishNote(notePath)
+  const note2 = await evermark.publishNote(notePath)
+  t.true(note2 != null)
 
   clientMock.verify()
   clientMock.restore()
 })
 
-test('should not create notebook if the notebook exists', async () => {
+test('should not create notebook if the notebook exists', async t => {
   const testDir = getTestDir()
-  await fileUtils.fs.copyAsync(fixturesDir, testDir)
+  await fileUtils.copy(fixturesDir, testDir)
   const evermark = new Evermark(testDir)
 
   const client = await evermark.getEvernoteClient()
   const clientMock = sinon.mock(client)
 
   const notebookName = 'bar'
-  const note = new Evernote.Note()
+  const note = new Evernote.Types.Note()
   note.guid = 'd'
 
-  clientMock.expects('createNote')
+  clientMock
+    .expects('createNote')
     .returns(Promise.resolve(note))
     .once()
-  clientMock.expects('listNotebooks')
+  clientMock
+    .expects('listNotebooks')
     .returns(Promise.resolve([{ name: notebookName }]))
     .once()
   clientMock.expects('createNotebook').never()
 
   const notePath = path.join(testDir, 'notes/d.md')
-  await evermark.publishNote(notePath)
+  const note2 = await evermark.publishNote(notePath)
+  t.true(note2 != null)
 
   clientMock.verify()
   clientMock.restore()
 })
 
-test('should unpublish note', async (t) => {
+test('should unpublish note', async t => {
   const testDir = getTestDir()
-  await fileUtils.fs.copyAsync(fixturesDir, testDir)
+  await fileUtils.copy(fixturesDir, testDir)
   const evermark = new Evermark(testDir)
 
   const client = await evermark.getEvernoteClient()
   const clientMock = sinon.mock(client)
 
-  const note = new Evernote.Note()
+  const note = new Evernote.Types.Note()
   note.guid = 'a'
 
   clientMock.expects('createNote').returns(Promise.resolve(note))
@@ -210,7 +224,10 @@ test('should unpublish note', async (t) => {
   t.is(result, notePath)
 
   const notExistNote = path.join('/not/exist/note.md')
-  t.throws(evermark.unpublishNote(notExistNote), `${notExistNote} is not a published note`)
+  await t.throwsAsync(
+    () => evermark.unpublishNote(notExistNote),
+    `${notExistNote} is not a published note`
+  )
 
   clientMock.verify()
   clientMock.restore()

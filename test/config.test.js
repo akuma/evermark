@@ -1,8 +1,8 @@
-import path from 'path'
-import test from 'ava'
-import fileUtils from '../src/fileUtils'
-import config from '../src/config'
-import utils from './helpers/utils'
+const path = require('path')
+const test = require('ava')
+const fileUtils = require('../src/fileUtils')
+const config = require('../src/config')
+const utils = require('./helpers/utils')
 
 const fixturesDir = path.join(__dirname, 'fixtures')
 
@@ -19,28 +19,30 @@ test.after(async () => {
   await fileUtils.remove(getTestDir(true))
 })
 
-test('should getConfigPath', async (t) => {
+test('should getConfigPath', async t => {
   const testDir = getTestDir()
-  await fileUtils.fs.copyAsync(fixturesDir, testDir)
+  await fileUtils.copy(fixturesDir, testDir)
 
   const configPath = await config.getConfigPath(testDir)
   t.is(configPath, path.join(testDir, 'evermark.json'))
 
-  t.throws(config.getConfigPath(path.join('/test')),
-    'Please run `evermark init [destination]` to init a new Evermark folder')
+  await t.throwsAsync(
+    () => config.getConfigPath(path.join('/test')),
+    'Please run `evermark init [destination]` to init a new Evermark folder'
+  )
 })
 
-test('should getDbPath', async (t) => {
+test('should getDbPath', async t => {
   const testDir = getTestDir()
-  await fileUtils.fs.copyAsync(fixturesDir, testDir)
+  await fileUtils.copy(fixturesDir, testDir)
 
   const dbPath = await config.getDbPath(testDir)
   t.is(dbPath, path.join(testDir, 'evermark.db'))
 })
 
-test('should readConfig', async (t) => {
+test('should readConfig', async t => {
   const testDir = getTestDir()
-  await fileUtils.fs.copyAsync(fixturesDir, testDir)
+  await fileUtils.copy(fixturesDir, testDir)
 
   const conf = await config.readConfig(testDir)
   t.is(conf.token, 'foo')
@@ -48,30 +50,35 @@ test('should readConfig', async (t) => {
   t.true(conf.sandbox)
 })
 
-test('should readConfig error if config file invalid', async (t) => {
-  t.throws(config.readConfig(),
-    'Please run `evermark init [destination]` to init a new Evermark folder')
+test('should readConfig error if config file invalid', async t => {
+  await t.throwsAsync(
+    () => config.readConfig(),
+    'Please run `evermark init [destination]` to init a new Evermark folder'
+  )
 
   const testDir = getTestDir()
   const configPath = path.join(testDir, 'evermark.json')
-  await fileUtils.fs.copyAsync(fixturesDir, testDir)
+  await fileUtils.copy(fixturesDir, testDir)
 
   await fileUtils.writeFile(configPath, 'token')
-  await t.throws(config.readConfig(testDir),
-    `Please write to ${configPath}:\n\n` +
-    `{\n  "token": "xxx",\n  "china": xxx\n}`)
+  await t.throwsAsync(
+    () => config.readConfig(testDir),
+    `Please write to ${configPath}:\n\n` + `{\n  "token": "xxx",\n  "china": xxx\n}`
+  )
 
   await fileUtils.writeFile(configPath, '{ "china": true }')
-  t.throws(config.readConfig(testDir),
+  await t.throwsAsync(
+    () => config.readConfig(testDir),
     `Please write developer token to ${configPath}\n\n` +
-    'To get a developer token, please visit:\n  ' +
-    'https://www.evernote.com/api/DeveloperToken.action or ' +
-    'https://app.yinxiang.com/api/DeveloperToken.action')
+      'To get a developer token, please visit:\n  ' +
+      'https://www.evernote.com/api/DeveloperToken.action or ' +
+      'https://app.yinxiang.com/api/DeveloperToken.action'
+  )
 })
 
-test('should getConfig', async (t) => {
+test('should getConfig', async t => {
   const testDir = getTestDir()
-  await fileUtils.fs.copyAsync(fixturesDir, testDir)
+  await fileUtils.copy(fixturesDir, testDir)
 
   const token = await config.getConfig('token', testDir)
   const china = await config.getConfig('china', testDir)
@@ -84,31 +91,40 @@ test('should getConfig', async (t) => {
   t.is(hello, undefined)
 })
 
-test('should setConfig', async (t) => {
+test('should setConfig', async t => {
   const testDir = getTestDir()
-  await fileUtils.fs.copyAsync(fixturesDir, testDir)
+  await fileUtils.copy(fixturesDir, testDir)
 
   let result = await config.setConfig('token', 'bar', testDir)
-  t.is(result, `{
+  t.is(
+    result,
+    `{
   "token": "bar",
   "china": false,
   "sandbox": true
-}`)
+}`
+  )
 
   result = await config.setConfig('china', 'true', testDir)
-  t.is(result, `{
+  t.is(
+    result,
+    `{
   "token": "bar",
   "china": true,
   "sandbox": true
-}`)
+}`
+  )
 
   result = await config.setConfig('hello', 'false', testDir)
-  t.is(result, `{
+  t.is(
+    result,
+    `{
   "token": "bar",
   "china": true,
   "sandbox": true,
   "hello": false
-}`)
+}`
+  )
 
   const conf = await config.readConfig(testDir)
   t.is(conf.token, 'bar')
@@ -118,16 +134,26 @@ test('should setConfig', async (t) => {
   t.is(conf.hi, undefined)
 })
 
-test('should setConfig error if json stringify error', async (t) => {
+test('should setConfig error if json stringify error', async t => {
   const testDir = getTestDir()
-  await fileUtils.fs.copyAsync(fixturesDir, testDir)
+  await fileUtils.copy(fixturesDir, testDir)
 
-  t.throws(config.setConfig('token', {
-    get foo() { throw new Error('Mock stringify error') },
-  }, testDir), 'Mock stringify error')
+  await t.throwsAsync(
+    () =>
+      config.setConfig(
+        'token',
+        {
+          get foo() {
+            throw new Error('Mock stringify error')
+          }
+        },
+        testDir
+      ),
+    'Mock stringify error'
+  )
 })
 
-test('should initConfig', async (t) => {
+test('should initConfig', async t => {
   let testDir = getTestDir()
   await config.initConfig(testDir)
 
@@ -146,5 +172,5 @@ test('should initConfig', async (t) => {
   t.false(conf.sandbox)
   t.is(conf.highlight, 'github')
 
-  t.throws(config.initConfig(testDir), 'Current directory does already inited')
+  await t.throwsAsync(() => config.initConfig(testDir), 'Current directory does already inited')
 })

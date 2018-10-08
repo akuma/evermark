@@ -1,10 +1,10 @@
-import path from 'path'
-import test from 'ava'
-import Database from 'warehouse'
-import Model from 'warehouse/lib/model'
-import Document from 'warehouse/lib/document'
-import Db from '../src/db'
-import fileUtils from '../src/fileUtils'
+const path = require('path')
+const test = require('ava')
+const Database = require('warehouse')
+const Model = require('warehouse/lib/model')
+const Document = require('warehouse/lib/document')
+const Db = require('../src/db')
+const fileUtils = require('../src/fileUtils')
 
 const fixturesDir = path.join(__dirname, 'fixtures')
 const testDir = path.join(__dirname, 'db-test')
@@ -13,28 +13,28 @@ const db = new Db(dbPath)
 
 test.before(async () => {
   await fileUtils.remove(testDir)
-  await fileUtils.fs.copyAsync(fixturesDir, testDir)
+  await fileUtils.copy(fixturesDir, testDir)
 })
 
 test.after(async () => {
   await fileUtils.remove(testDir)
 })
 
-test('should get db', async (t) => {
+test('should get db', async t => {
   const dbo = await db.get()
   t.true(dbo instanceof Database)
 })
 
-test('should get model', async (t) => {
+test('should get model', async t => {
   const Test = await db.model('Test', {
-    name: { type: String, required: true },
+    name: { type: String, required: true }
   })
   t.true(Test instanceof Model)
 })
 
-test('should save', async (t) => {
+test('should save', async t => {
   const Test = await db.model('Test', {
-    name: { type: String, required: true },
+    name: { type: String, required: true }
   })
 
   await Test.insert({ name: 'foo' })

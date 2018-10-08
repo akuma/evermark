@@ -36,3 +36,5 @@ node_modules
 lib
 .DS_Store
 .nyc_output
+.history
+.vscode

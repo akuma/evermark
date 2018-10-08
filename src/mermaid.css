@@ -1,0 +1,12 @@
+html,
+body {
+  font-family: Microsoft YaHei, Helvetica Neue, Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  color: #333;
+  padding: 16px;
+  line-height: 1.5;
+}
+
+svg {
+  max-width: 100% !important;
+}

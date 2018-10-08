@@ -1,33 +1,33 @@
-/* eslint no-param-reassign: 0 */
-
-import path from 'path'
-import crypto from 'crypto'
-import Promise from 'bluebird'
-import cheerio from 'cheerio'
-import hljs from 'highlight.js'
-import inlineCss from 'inline-css'
-import MarkdownIt from 'markdown-it'
-import mdSub from 'markdown-it-sub'
-import mdSup from 'markdown-it-sup'
-import mdEmoji from 'markdown-it-emoji'
-import mdMathJax from 'markdown-it-mathjax'
-import mdEnmlTodo from 'markdown-it-enml-todo'
-import mermaidLib from 'mermaid/lib'
-import mermaidCli from 'mermaid/lib/cli'
-import mathJax from 'mathjax-node/lib/mj-page'
-import svg2png from 'svg2png'
-import { Evernote } from 'evernote'
-import EvernoteClient, {
+const path = require('path')
+const crypto = require('crypto')
+const { promisify } = require('util')
+const exec = promisify(require('child_process').exec)
+const Promise = require('bluebird')
+const cheerio = require('cheerio')
+const hljs = require('highlight.js')
+const inlineCss = require('inline-css')
+const MarkdownIt = require('markdown-it')
+const mdSub = require('markdown-it-sub')
+const mdSup = require('markdown-it-sup')
+const mdEmoji = require('markdown-it-emoji')
+const mdMathJax = require('markdown-it-mathjax')
+const mdEnmlTodo = require('markdown-it-enml-todo')
+const mathJax = require('mathjax-node/lib/mj-page')
+const svg2png = require('svg2png')
+const debug = require('debug')('evermark')
+const {
+  Evernote,
+  EvernoteClient,
   OBJECT_NOT_FOUND,
   DEFAULT_RESOURCE_TYPE,
-  RESOURCE_TYPES,
-} from './EvernoteClient'
-import Db from './db'
-import fileUtils from './fileUtils'
-import config, { APP_NAME } from './config'
-import EvermarkError from './EvermarkError'
+  RESOURCE_TYPES
+} = require('./EvernoteClient')
+const EvermarkError = require('./EvermarkError')
+const Db = require('./db')
+const fileUtils = require('./fileUtils')
+const config = require('./config')
 
-const debug = require('debug')('evermark')
+const { APP_NAME } = config
 
 const NOTE_PATH = 'notes'
 const NOTE_MATH_PATH = `${NOTE_PATH}/maths`
@@ -41,7 +41,7 @@ const MATH_EX_PX_RATIO = 8.27
 // Init mathJax api
 mathJax.start()
 
-export default class Evermark {
+class Evermark {
   constructor(workDir = `.${path.sep}`, options = {}) {
     this.workDir = workDir
     debug('workDir:', this.workDir)
@@ -67,7 +67,7 @@ export default class Evermark {
 
         return `<pre class="hljs"><code>${md.utils.escapeHtml(code)}</code></pre>`
       },
-      ...options,
+      ...options
     })
 
     // Use some plugins
@@ -121,7 +121,7 @@ export default class Evermark {
     const Note = await db.model('notes', {
       guid: { type: String, required: true },
       path: { type: String, required: true },
-      created: { type: Date, default: Date.now },
+      created: { type: Date, default: Date.now }
     })
 
     const { absolutePath, relativePath } = await this.getNotePathInfo(notePath)
@@ -138,9 +138,9 @@ export default class Evermark {
   }
 
   async saveNote(notePath, content) {
-    const note = new Evernote.Note()
+    const note = new Evernote.Types.Note()
 
-    const noteAttrs = new Evernote.NoteAttributes()
+    const noteAttrs = new Evernote.Types.NoteAttributes()
     noteAttrs.source = APP_NAME
     noteAttrs.sourceApplication = APP_NAME
     noteAttrs.contentClass = APP_NAME // Make the note read-only
@@ -168,7 +168,8 @@ export default class Evermark {
     // (ENML). The full ENML specification can be found in the Evernote API Overview
     // at http://dev.evernote.com/documentation/cloud/chapters/ENML.php
     const htmlContent = await this.generateHtml(note, tokens)
-    note.content = '<?xml version="1.0" encoding="UTF-8"?>' +
+    note.content =
+      '<?xml version="1.0" encoding="UTF-8"?>' +
       '<!DOCTYPE en-note SYSTEM "http://xml.evernote.com/pub/enml2.dtd">' +
       `<en-note>${htmlContent}</en-note>`
 
@@ -180,7 +181,7 @@ export default class Evermark {
     const Note = await db.model('notes', {
       guid: { type: String, required: true },
       path: { type: String, required: true },
-      created: { type: Date, default: Date.now },
+      created: { type: Date, default: Date.now }
     })
 
     let isLocalUpdate = false
@@ -205,8 +206,10 @@ export default class Evermark {
     createdNote.absolutePath = note.absolutePath
 
     if (isLocalUpdate) {
-      await Note.update({ path: note.relativePath },
-        { guid: createdNote.guid, path: note.relativePath })
+      await Note.update(
+        { path: note.relativePath },
+        { guid: createdNote.guid, path: note.relativePath }
+      )
     } else {
       await Note.insert({ guid: createdNote.guid, path: note.relativePath })
     }
@@ -225,42 +228,35 @@ export default class Evermark {
   }
 
   listNotebooks() {
-    return this.getEvernoteClient()
-      .then(client => client.listNotebooks())
+    return this.getEvernoteClient().then(client => client.listNotebooks())
   }
 
   createNotebook(name) {
-    return this.getEvernoteClient()
-      .then(client => client.createNotebook(name))
+    return this.getEvernoteClient().then(client => client.createNotebook(name))
   }
 
   createNote(note) {
-    return this.getEvernoteClient()
-      .then(client => client.createNote(note))
+    return this.getEvernoteClient().then(client => client.createNote(note))
   }
 
   updateNote(note) {
-    return this.getEvernoteClient()
-      .then(client => client.updateNote(note))
+    return this.getEvernoteClient().then(client => client.updateNote(note))
   }
 
   expungeNote(guid) {
-    return this.getEvernoteClient()
-      .then(client => client.expungeNote(guid))
+    return this.getEvernoteClient().then(client => client.expungeNote(guid))
   }
 
   getEvernoteClient() {
     if (!this.evernoteClient) {
-      this.evernoteClient = this.getConfig()
-        .then(options => new EvernoteClient(options))
+      this.evernoteClient = this.getConfig().then(options => new EvernoteClient(options))
     }
     return this.evernoteClient
   }
 
   getConfig() {
     if (!this.config) {
-      this.config = config.readConfig(this.workDir)
-        .then(conf => conf)
+      this.config = config.readConfig(this.workDir).then(conf => conf)
     }
     return this.config
   }
@@ -272,8 +268,7 @@ export default class Evermark {
 
   getDb() {
     if (!this.db) {
-      this.db = config.getDbPath(this.workDir)
-        .then(dbPath => new Db(dbPath))
+      this.db = config.getDbPath(this.workDir).then(dbPath => new Db(dbPath))
     }
     return this.db
   }
@@ -281,10 +276,8 @@ export default class Evermark {
   async getNotePathInfo(notePath) {
     const configDir = await this.getConfigDir()
 
-    const absolutePath = path.isAbsolute(notePath) ?
-      notePath : path.resolve(notePath)
-    const relativePath = path.relative(configDir, absolutePath)
-      .replace(/\\/g, '/') // Fix windows issue
+    const absolutePath = path.isAbsolute(notePath) ? notePath : path.resolve(notePath)
+    const relativePath = path.relative(configDir, absolutePath).replace(/\\/g, '/') // Fix windows issue
 
     debug('absolute notePath: %s', absolutePath)
     debug('relative notePath: %s', relativePath)
@@ -327,7 +320,7 @@ export default class Evermark {
     await this.processDiagrams($)
     const mathStyles = await this.processMathEquations($)
     await this.processStyles($, mathStyles)
-    await this.attchResources($, note)
+    await this.attachResources($, note)
 
     // ENML is a superset of XHTML, so change html to xhtml
     const finalXhtml = $.xml()
@@ -342,44 +335,55 @@ export default class Evermark {
       mermaids.push($(e).text())
     })
 
-    const mmdImgs = await Promise.map(mermaids, async (mermaid) => {
+    const mmdImgs = await Promise.map(mermaids, async mermaid => {
       const mmdFile = path.join(this.workDir, NOTE_DIAGRAM_PATH, `${Evermark.genHash(mermaid)}.mmd`)
+      const mmdPng = mmdFile.replace(/\.mmd/, '.png')
       await fileUtils.writeFile(mmdFile, mermaid)
-      await new Promise((resolve, reject) => {
-        mermaidCli.parse(['-p', '-o', path.join(this.workDir, NOTE_DIAGRAM_PATH), mmdFile],
-          (err, message, options) => {
-            if (err) {
-              reject(err)
-            } else if (message) {
-              reject(message)
-            } else {
-              mermaidLib.process(options.files, options, () => resolve())
-            }
-          }
+
+      try {
+        const mmdCss = path.join(__dirname, 'mermaid.css')
+        const { stdout, stderr } = await exec(
+          `node_modules/mermaid.cli/index.bundle.js -i ${mmdFile} -o ${mmdPng} -w 1280 -C ${mmdCss}`
         )
-      })
-      return `${mmdFile.slice(path.join(this.workDir, NOTE_PATH).length + 1)}.png`
+        debug('mermaid.cli stdout:', stdout)
+        if (stderr) {
+          throw new Error(`mermaid.cli error: ${stderr}`)
+        }
+      } catch (e) {
+        throw new Error(`mermaid.cli error: ${e}`)
+      }
+
+      // const srcData = await fileUtils.readFile(mmdSvg)
+      // const destData = await svg2png(srcData)
+      // const mmdPng = mmdFile.replace(/\.mmd/, '.png')
+      // await fileUtils.writeFile(mmdPng, destData)
+      debug('mmdPng:', mmdPng)
+
+      return `${mmdPng.slice(path.join(this.workDir, NOTE_PATH).length + 1)}`
     })
     debug('mermaid images:', mmdImgs)
 
     // Replace mermaid codes with mermaid diagrams
     $mermaids.each((i, e) => {
-      $(e).replaceWith(`<img src="${mmdImgs[i]}" alt="mermaid diagram">`)
+      $(e).replaceWith(`<img src="${mmdImgs[i]}" alt="mermaid diagram" style="max-width: 80%;">`)
     })
   }
 
   async processMathEquations($) {
     const html = await new Promise((resolve, reject) => {
-      mathJax.typeset({
-        html: $.html(),
-        renderer: 'SVG',
-      }, (result) => {
-        if (result.errors) {
-          reject(result.errors)
-        } else {
-          resolve(result.html)
+      mathJax.typeset(
+        {
+          html: $.html(),
+          renderer: 'SVG'
+        },
+        result => {
+          if (result.errors) {
+            reject(result.errors)
+          } else {
+            resolve(result.html)
+          }
         }
-      })
+      )
     })
     $.root().html(html)
 
@@ -394,28 +398,34 @@ export default class Evermark {
     const $svgs = $('svg')
     $svgs.each((i, e) => {
       mathSvgs.push({
-        data: $(e).prepend(mathSvgGlyphs).parent().html(),
+        data: $(e)
+          .prepend(mathSvgGlyphs)
+          .parent()
+          .html(),
         width: parseInt($(e).attr('width'), 10) * MATH_EX_PX_RATIO,
-        height: parseInt($(e).attr('height'), 10) * MATH_EX_PX_RATIO,
+        height: parseInt($(e).attr('height'), 10) * MATH_EX_PX_RATIO
       })
     })
 
-    const mathImgs = await Promise.map(mathSvgs, async (svg) => {
+    const mathImgs = await Promise.map(mathSvgs, async svg => {
       const img = path.join(this.workDir, NOTE_MATH_PATH, `${Evermark.genHash(svg.data)}.png`)
-      await svg2png(Buffer.from(svg.data), { width: svg.width * 2, height: svg.height * 2 })
-        .then(buffer => fileUtils.writeFile(img, buffer))
+      await svg2png(Buffer.from(svg.data), { width: svg.width * 2, height: svg.height * 2 }).then(
+        buffer => fileUtils.writeFile(img, buffer)
+      )
       return {
         src: `${img.slice(path.join(this.workDir, NOTE_PATH).length + 1)}`,
         width: svg.width,
-        height: svg.height,
+        height: svg.height
       }
     })
     debug('mathImgs:', mathImgs)
 
     // Replace math svgs with math images
     $svgs.each((i, e) => {
-      $(e).replaceWith(`<img src="${mathImgs[i].src}" alt="math equation"` +
-        `width="${mathImgs[i].width}" height="${mathImgs[i].height}">`)
+      $(e).replaceWith(
+        `<img src="${mathImgs[i].src}" alt="math equation"` +
+          `width="${mathImgs[i].width}" height="${mathImgs[i].height}">`
+      )
     })
 
     return mathStyles
@@ -430,10 +440,10 @@ export default class Evermark {
     const styles = await Promise.all([
       mathStyles,
       fileUtils.readFile(path.join(MARKDOWN_THEME_PATH, 'github.css')),
-      fileUtils.readFile(path.join(HIGHLIGHT_THEME_PATH, `${highlightTheme}.css`)),
+      fileUtils.readFile(path.join(HIGHLIGHT_THEME_PATH, `${highlightTheme}.css`))
     ])
-    const styleHtml = `<style>${styles.join('')}</style>` +
-      `<div class="markdown-body">${$.html()}</div>`
+    const styleHtml =
+      `<style>${styles.join('')}</style>` + `<div class="markdown-body">${$.html()}</div>`
     debug('styleHtml: %s', styleHtml)
     $.root().html(styleHtml)
 
@@ -441,31 +451,33 @@ export default class Evermark {
     const inlineStyleHtml = await inlineCss($.html(), {
       url: '/',
       removeStyleTags: true,
-      removeHtmlSelectors: true,
+      removeHtmlSelectors: true
     })
     $.root().html(inlineStyleHtml)
     $('en-todo').removeAttr('style')
   }
 
-  async attchResources($, note) {
+  async attachResources($, note) {
     const configDir = await this.getConfigDir()
 
-    const imgs = $('img').toArray().filter(img => !/^.+:\/\//.test(img.attribs.src))
-    note.resources = await Promise.map(imgs, async (img) => {
+    const imgs = $('img')
+      .toArray()
+      .filter(img => !/^.+:\/\//.test(img.attribs.src))
+    note.resources = await Promise.map(imgs, async img => {
       const src = decodeURI(img.attribs.src)
       delete img.attribs.src
       img.name = 'en-media'
 
       const extname = path.extname(src)
       const imgType = RESOURCE_TYPES[extname] || DEFAULT_RESOURCE_TYPE
-      img.attribs.type = imgType // eslint-disable-line
+      img.attribs.type = imgType
 
       const image = await fileUtils.readFile(path.join(configDir, `${NOTE_PATH}/${src}`), null)
       img.attribs.hash = Evermark.genHash(image)
 
-      const resource = new Evernote.Resource()
-      resource.mime = 'image/jpg'
-      resource.data = new Evernote.Data()
+      const resource = new Evernote.Types.Resource()
+      resource.mime = 'image/jpeg'
+      resource.data = new Evernote.Types.Data()
       resource.data.body = image
       resource.data.bodyHash = image.toString('base64')
       resource.data.size = image.length
@@ -479,3 +491,5 @@ export default class Evermark {
     return md5.digest('hex')
   }
 }
+
+module.exports = Evermark

@@ -1,13 +1,14 @@
 {
-  "env": {
-    "node": true,
-    "es6": true
-  },
-  "parser": "babel-eslint",
-  "extends": "airbnb-base",
+  "extends": ["standard", "prettier"],
+  "plugins": ["standard", "prettier"],
   "rules": {
-    "semi": [2, "never"],
-    "no-use-before-define": [2, "nofunc"],
-    "import/no-extraneous-dependencies": [2, { "devDependencies": true }]
+    "prettier/prettier": [
+      "error",
+      {
+        "printWidth": 100,
+        "semi": false,
+        "singleQuote": true
+      }
+    ]
   }
 }

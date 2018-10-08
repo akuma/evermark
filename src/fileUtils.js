@@ -1,87 +1,39 @@
 /**
- * 此文件包含操作文件、目录的常用工具方法。
  * This file contains common utility methods manipulating files and directories.
  */
 
-import path from 'path'
-import fsExtra from 'fs-extra'
-import Promise from 'bluebird'
-
-const fs = Promise.promisifyAll(fsExtra)
-
-/**
- * 验证文件或目录是否可访问。
- * Verify that the file or directory is accessible.
- */
-function exists(file) {
-  return new Promise((resolve) => {
-    fs.access(file, fs.F_OK, err => resolve(!err))
-  })
-}
-
-/**
- * 删除指定的文件或目录。
- * Delete the specified file or directory.
- */
-function remove(file) {
-  return fs.removeAsync(file)
-}
-
-/**
- * 确保指定目录存在，如果目录不存在会自动创建。
- * Ensure that the specified directory exists, if the directory does not exist
- * it will be created automatically.
- */
-function ensureDir(dir) {
-  return fs.ensureDirAsync(dir)
-}
-
-/**
- * 确保指定文件存在，如果文件不存在会自动创建。
- * Be sure to specify the file exists, if the file does not exist will be
- * created automatically.
- */
-function ensureFile(file) {
-  return fs.ensureFileAsync(file)
-}
+const path = require('path')
+const fs = require('fs-extra')
 
 /**
  * 从指定的文件数据。
+ *
  * Read data from the specified file.
  */
 function readFile(file, encoding = 'utf8') {
-  return fs.readFileAsync(file, encoding)
-}
-
-/**
- * 写数据到指定的文件，如果文件不存在会自动创建。
- * Write data to the specified file, if the file does not exist will be created
- * automatically.
- */
-function writeFile(file, data) {
-  return fs.outputFileAsync(file, data)
+  return fs.readFile(file, encoding)
 }
 
 /**
  * 根据文件名递归查找文件，直至到最顶层目录为止。
+ *
  * Recursively find files by file name, until up to the top level directory.
  */
 function searchFile(filename, dir = `.${path.sep}`) {
   const aDir = dir.endsWith(path.sep) ? dir : `${dir}${path.sep}`
   const currentPath = path.resolve(aDir, filename)
-  return exists(currentPath)
-    .then((isExists) => {
-      if (isExists) {
-        return currentPath
-      }
+  return fs.pathExists(currentPath).then(isExists => {
+    if (isExists) {
+      return currentPath
+    }
 
-      const nextPath = path.resolve(`${aDir}..${path.sep}`, filename)
-      if (nextPath === currentPath) {
-        return null
-      }
+    const nextPath = path.resolve(`${aDir}..${path.sep}`, filename)
+    if (nextPath === currentPath) {
+      return null
+    }
 
-      return searchFile(filename, `${aDir}..${path.sep}`)
-    })
+    return searchFile(filename, `${aDir}..${path.sep}`)
+  })
 }
 
 /**
@@ -100,18 +52,18 @@ function uniquePath(file) {
   const basename = path.basename(file, extname)
   const filenameRegex = new RegExp(`${basename}-(\\d+)${extname}`)
 
-  return exists(absolutePath)
-    .then(exist => (exist ? fs.readdirAsync(dirname) : absolutePath))
-    .then((result) => {
+  return fs
+    .pathExists(absolutePath)
+    .then(exist => (exist ? fs.readdir(dirname) : absolutePath))
+    .then(result => {
       if (Array.isArray(result) && result.length) {
         let maxSerial = 0
 
-        const files = result.filter(name => filenameRegex.test(name))
-          .sort((a, b) => {
-            const an = a.replace(filenameRegex, '$1')
-            const bn = b.replace(filenameRegex, '$1')
-            return parseInt(an, 10) - parseInt(bn, 10)
-          })
+        const files = result.filter(name => filenameRegex.test(name)).sort((a, b) => {
+          const an = a.replace(filenameRegex, '$1')
+          const bn = b.replace(filenameRegex, '$1')
+          return parseInt(an, 10) - parseInt(bn, 10)
+        })
         if (files.length) {
           const maxSerialFilename = files[files.length - 1]
           maxSerial = parseInt(maxSerialFilename.replace(filenameRegex, '$1'), 10)
@@ -124,14 +76,15 @@ function uniquePath(file) {
     })
 }
 
-export default {
-  fs,
-  exists,
-  remove,
-  ensureDir,
-  ensureFile,
+module.exports = {
+  exists: fs.pathExists,
+  copy: fs.copy,
+  remove: fs.remove,
+  ensureDir: fs.ensureDir,
+  ensureFile: fs.ensureFile,
+  readdir: fs.readdir,
   readFile,
-  writeFile,
+  writeFile: fs.outputFile,
   searchFile,
-  uniquePath,
+  uniquePath
 }
