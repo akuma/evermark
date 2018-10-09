@@ -34,6 +34,7 @@ const NOTE_MATH_PATH = `${NOTE_PATH}/maths`
 const NOTE_DIAGRAM_PATH = `${NOTE_PATH}/diagrams`
 const MARKDOWN_THEME_PATH = path.join(__dirname, '../themes')
 const HIGHLIGHT_THEME_PATH = path.join(__dirname, '../node_modules/highlight.js/styles')
+const MERMAID_CLI_PATH = path.join(__dirname, '../node_modules/mermaid.cli/index.bundle.js')
 
 const DEFAULT_HIGHLIGHT_THEME = 'github'
 const MATH_EX_PX_RATIO = 8.27
@@ -343,7 +344,7 @@ class Evermark {
       try {
         const mmdCss = path.join(__dirname, 'mermaid.css')
         const { stdout, stderr } = await exec(
-          `node_modules/mermaid.cli/index.bundle.js -i ${mmdFile} -o ${mmdPng} -w 1280 -C ${mmdCss}`
+          `${MERMAID_CLI_PATH} -i ${mmdFile} -o ${mmdPng} -w 1280 -C ${mmdCss}`
         )
         debug('mermaid.cli stdout:', stdout)
         if (stderr) {
